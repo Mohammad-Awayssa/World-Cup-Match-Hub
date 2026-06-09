@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="g1"><stop stop-color="#006847" stop-opacity=".8"/><stop offset="1" stop-color="#050510" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g2"><stop stop-color="#1B2A4A"/><stop offset="1" stop-color="#050510" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#050510"/>
+  <circle cx="160" cy="100" r="460" fill="url(#g1)"/>
+  <circle cx="1060" cy="80" r="500" fill="url(#g2)"/>
+  <path d="M0 540c230-90 405-90 600 0 195-90 370-90 600 0v90H0z" fill="#C8102E" opacity=".35"/>
+  <text x="600" y="235" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="38" font-weight="700" letter-spacing="10">CANADA • MEXICO • USA</text>
+  <text x="600" y="350" text-anchor="middle" fill="white" font-family="Arial" font-size="94" font-weight="900">WORLD CUP 2026</text>
+  <text x="600" y="425" text-anchor="middle" fill="#b7bdd5" font-family="Arial" font-size="42">MATCH HUB</text>
+  <rect x="450" y="475" width="300" height="5" rx="3" fill="#FFD700"/>
+</svg>
