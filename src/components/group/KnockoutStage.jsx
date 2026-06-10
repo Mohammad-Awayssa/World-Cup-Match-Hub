@@ -17,6 +17,11 @@ const stageDates = {
   Final: 'Jul 19',
 };
 
+const formatKnockoutDate = (iso) => new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+}).format(new Date(iso));
+
 function TeamSlot({ name }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
@@ -34,7 +39,7 @@ function KnockoutMatch({ match }) {
       <div className="mb-3 flex items-start justify-between gap-2">
         <span className="font-heading text-xs font-black text-neon">{String(match.matchNumber).padStart(2, '0')}</span>
         <span className="text-right text-[9px] leading-4 text-white/40">
-          {formatLocalDate(match.kickoffUTC, { year: undefined })}<br />
+          {formatKnockoutDate(match.kickoffUTC)}<br />
           {formatLocalTime(match.kickoffUTC)}
         </span>
       </div>

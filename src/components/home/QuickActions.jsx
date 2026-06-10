@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const actions = [
   [CalendarDays, 'Schedule', 'All matches', '/schedule', 'text-neon'],
   [Users, 'Groups', 'View groups', '/groups', 'text-purple-400'],
-  [BarChart3, 'Standings', 'Tables & stats', '/groups', 'text-green-400'],
+  [BarChart3, 'Knockout', 'Road to the final', '/knockout', 'text-green-400'],
   [Building2, 'Host Cities', '16 cities', '/about', 'text-red-400'],
   [Shirt, 'Teams', '48 teams', '/groups', 'text-blue-400'],
 ];

@@ -1,28 +1,24 @@
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import { DataProvider } from './context/DataProvider';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import SchedulePage from './pages/SchedulePage';
 import GroupsPage from './pages/GroupsPage';
+import KnockoutPage from './pages/KnockoutPage';
 import AboutPage from './pages/AboutPage';
 
 function RoutedApp() {
-  const location = useLocation();
   return (
     <>
       <Navbar />
-      <AnimatePresence mode="wait">
-        <motion.div key={location.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .2 }}>
-          <Routes location={location}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/schedule" element={<SchedulePage />} />
-            <Route path="/groups" element={<GroupsPage />} />
-            <Route path="/about" element={<AboutPage />} />
-          </Routes>
-        </motion.div>
-      </AnimatePresence>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/schedule" element={<SchedulePage />} />
+        <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/knockout" element={<KnockoutPage />} />
+        <Route path="/about" element={<AboutPage />} />
+      </Routes>
       <Footer />
     </>
   );

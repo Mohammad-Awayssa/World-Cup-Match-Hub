@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import worldCupLogo from '../../assets/wordcuplogo.png';
 
 const links = [
   ['/', 'Matches', true],
   ['/groups', 'Groups', true],
-  ['/groups', 'Standings', false],
-  ['/groups', 'Teams', false],
-  ['/about', 'About', true],
+  ['/knockout', 'Knockout', true],
+  ['/schedule', 'Schedule', true],
 ];
 
 export function Navbar() {
@@ -28,9 +27,9 @@ export function Navbar() {
         </NavLink>
 
         <div className="hidden h-full gap-5 md:flex">
-          {links.map(([to, label, tracksActive]) => tracksActive
-            ? <NavLink key={label} to={to} end={to === '/'} className={linkClass}>{label}</NavLink>
-            : <Link key={label} to={to} className="relative flex items-center px-3 text-sm font-semibold text-white/65 transition-colors hover:text-white">{label}</Link>)}
+          {links.map(([to, label]) => (
+            <NavLink key={label} to={to} end={to === '/'} className={linkClass}>{label}</NavLink>
+          ))}
         </div>
 
         <button className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 md:hidden" onClick={() => setOpen(!open)} aria-label="Toggle navigation">
@@ -43,7 +42,7 @@ export function Navbar() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-white/[.06] bg-[#030914] md:hidden">
             <div className="section-shell flex flex-col py-3">
               {links.map(([to, label], index) => (
-                <NavLink key={`${label}-${index}`} to={to} end={to === '/'} className={({ isActive }) => `rounded-xl px-4 py-3 text-sm font-semibold ${isActive && index < 2 ? 'bg-neon/10 text-neon' : 'text-text-secondary'}`} onClick={() => setOpen(false)}>
+                <NavLink key={`${label}-${index}`} to={to} end={to === '/'} className={({ isActive }) => `rounded-xl px-4 py-3 text-sm font-semibold ${isActive ? 'bg-neon/10 text-neon' : 'text-text-secondary'}`} onClick={() => setOpen(false)}>
                   {label}
                 </NavLink>
               ))}
