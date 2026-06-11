@@ -33,7 +33,7 @@ export default function HomePage() {
   const sorted = sortByKickoff(matches);
   const nextMatch = getNextMatch(sorted);
   const today = sorted.filter((match) => isToday(match.kickoffUTC));
-  const upcoming = sorted.filter((match) => new Date(match.kickoffUTC) >= new Date());
+  const upcoming = sorted.filter((match) => match.status === 'live' || new Date(match.kickoffUTC) >= new Date());
 
   return (
     <main className="home-broadcast pb-20">

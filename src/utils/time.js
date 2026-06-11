@@ -24,8 +24,18 @@ export const isToday = (iso) => {
 export const getNextMatch = (matches) => {
   const now = Date.now();
   return [...matches]
-    .filter((match) => match.status === 'live' || new Date(match.kickoffUTC).getTime() > now)
-    .sort((a, b) => new Date(a.kickoffUTC) - new Date(b.kickoffUTC))[0] ?? matches.at(-1);
+    .filter((match) => (
+      match.status === 'live'
+      || (
+        !['finished', 'cancelled'].includes(match.status)
+        && new Date(match.kickoffUTC).getTime() > now
+      )
+    ))
+    .sort((a, b) => {
+      if (a.status === 'live' && b.status !== 'live') return -1;
+      if (b.status === 'live' && a.status !== 'live') return 1;
+      return new Date(a.kickoffUTC) - new Date(b.kickoffUTC);
+    })[0] ?? matches.at(-1);
 };
 
 export const daysUntil = (iso) => Math.max(0, Math.ceil((new Date(iso) - Date.now()) / 86400000));

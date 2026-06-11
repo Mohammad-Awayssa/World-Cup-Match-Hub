@@ -24,7 +24,7 @@ const statusPriority = {
 
 const normalizeFootballDataMatch = (match) => ({
   providerId: String(match.id),
-  matchNumber: match.matchday ?? null,
+  matchNumber: null,
   kickoffUTC: match.utcDate,
   status: statusMap[match.status] ?? match.status?.toLowerCase() ?? 'unknown',
   providerStatus: match.status,
@@ -64,6 +64,28 @@ const normalizeWorldCup26Match = (match) => ({
   group: match.group ?? null,
   stage: match.type ?? null,
 });
+
+const teamAliases = {
+  'korea republic': 'south korea',
+  'united states': 'usa',
+  'united states of america': 'usa',
+};
+
+const normalizeTeamName = (name = '') => {
+  const normalized = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+  return teamAliases[normalized] ?? normalized;
+};
+
+const matchKey = (match) => [
+  normalizeTeamName(match.homeTeam),
+  normalizeTeamName(match.awayTeam),
+].join('|');
 
 async function fetchFootballData() {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
@@ -109,9 +131,13 @@ function mergeMatches(primaryMatches, fallbackMatches) {
   const fallbackByNumber = new Map(
     fallbackMatches.map((match) => [match.matchNumber, match]),
   );
+  const fallbackByTeams = new Map(
+    fallbackMatches.map((match) => [matchKey(match), match]),
+  );
 
   return primaryMatches.map((primary) => {
-    const fallback = fallbackByNumber.get(primary.matchNumber);
+    const fallback = fallbackByTeams.get(matchKey(primary))
+      ?? fallbackByNumber.get(primary.matchNumber);
 
     if (!fallback) return primary;
 
@@ -120,6 +146,7 @@ function mergeMatches(primaryMatches, fallbackMatches) {
 
     return {
       ...primary,
+      matchNumber: fallback.matchNumber ?? primary.matchNumber,
       status: fallbackHasNewerStatus ? fallback.status : primary.status,
       providerStatus: fallbackHasNewerStatus
         ? fallback.providerStatus

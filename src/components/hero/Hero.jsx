@@ -8,6 +8,8 @@ import backgroundMobile from '../../assets/updatedBGmobile.png';
 
 export function Hero({ match }) {
   if (!match) return null;
+  const isLive = match.status === 'live';
+  const hasScore = Number.isFinite(match.homeScore) && Number.isFinite(match.awayScore);
 
   return (
     <section className="relative overflow-hidden border-b border-white/[.06]">
@@ -21,18 +23,20 @@ export function Hero({ match }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }} className="match-hero-card relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] px-4 pb-5 pt-7 sm:px-10 sm:pb-7">
           <div className="mb-6 flex items-center justify-center gap-4">
             <span className="h-px w-8 bg-neon sm:w-12" />
-            <p className="font-heading text-xs font-black uppercase tracking-[.18em] text-neon">Next Match</p>
+            <p className={`font-heading text-xs font-black uppercase tracking-[.18em] ${isLive ? 'text-red-400' : 'text-neon'}`}>{isLive ? 'Match In Progress' : 'Next Match'}</p>
             <span className="h-px w-8 bg-neon sm:w-12" />
           </div>
 
-          <CountdownTimer target={match.kickoffUTC} />
+          <CountdownTimer target={match.kickoffUTC} status={match.status} />
 
           <div className="mt-8 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center sm:mt-10 sm:gap-8">
             <div className="flex min-w-0 flex-col items-center">
               <FlagImage code={match.homeCode} team={match.homeTeam} large />
               <strong className="font-heading mt-4 text-lg font-black uppercase leading-tight sm:text-2xl">{match.homeTeam}</strong>
             </div>
-            <span className="vs-brush font-heading text-4xl font-black italic text-neon sm:text-6xl">VS</span>
+            <span className="vs-brush font-heading text-4xl font-black italic text-neon sm:text-6xl">
+              {hasScore ? `${match.homeScore}-${match.awayScore}` : 'VS'}
+            </span>
             <div className="flex min-w-0 flex-col items-center">
               <FlagImage code={match.awayCode} team={match.awayTeam} large />
               <strong className="font-heading mt-4 text-lg font-black uppercase leading-tight sm:text-2xl">{match.awayTeam}</strong>

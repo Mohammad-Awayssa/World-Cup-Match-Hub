@@ -1,12 +1,24 @@
 import matchesDocument from '../../data/matches.json';
 import groups from '../../data/groups.json';
 import stadiums from '../../data/stadiums.json';
+import { mergeLiveMatches } from '../../utils/liveMatches';
 
 const clone = (value) => structuredClone(value);
 const matches = matchesDocument.matches;
 
+const getMatchesWithLiveData = async () => {
+  try {
+    const response = await fetch('/api/live-scores');
+    if (!response.ok) throw new Error(`Live scores returned ${response.status}`);
+    const data = await response.json();
+    return mergeLiveMatches(matches, data.matches ?? []);
+  } catch {
+    return mergeLiveMatches(matches, []);
+  }
+};
+
 export const localAdapter = {
-  getAllMatches: async () => clone(matches),
+  getAllMatches: async () => clone(await getMatchesWithLiveData()),
   getScheduleMetadata: async () => clone({
     lastUpdated: matchesDocument.lastUpdated,
     source: matchesDocument.source,

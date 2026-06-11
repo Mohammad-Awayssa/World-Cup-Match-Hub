@@ -12,10 +12,10 @@ function CountdownBox({ value, label }) {
   );
 }
 
-export function CountdownTimer({ target }) {
+export function CountdownTimer({ target, status }) {
   const countdown = useCountdown(target);
-  if (countdown.isExpired) {
-    return <div className="font-heading text-2xl font-bold text-gold">The tournament is underway</div>;
+  if (status === 'live' || countdown.isExpired) {
+    return <div className="font-heading text-center text-2xl font-black uppercase tracking-[.12em] text-red-400 drop-shadow-[0_0_12px_rgba(248,113,113,.45)]">Live Now</div>;
   }
   return (
     <div aria-live="polite" aria-label="Countdown to next match" className="flex justify-center">
