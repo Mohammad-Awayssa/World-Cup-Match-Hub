@@ -5,7 +5,7 @@ const teamAliases = {
 };
 
 const normalizeTeamName = (name = '') => {
-  const normalized = name
+  const normalized = String(name ?? '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
