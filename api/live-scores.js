@@ -66,6 +66,9 @@ const normalizeWorldCup26Match = (match) => ({
 });
 
 const teamAliases = {
+  'bosnia and herzegovina': 'bosnia herzegovina',
+  'bosnia herzegovina': 'bosnia herzegovina',
+  'czech republic': 'czechia',
   'korea republic': 'south korea',
   'united states': 'usa',
   'united states of america': 'usa',
@@ -143,6 +146,7 @@ function mergeMatches(primaryMatches, fallbackMatches) {
 
     const fallbackHasNewerStatus =
       (statusPriority[fallback.status] ?? 0) > (statusPriority[primary.status] ?? 0);
+    const fallbackHasScore = ['live', 'finished'].includes(fallback.status);
 
     return {
       ...primary,
@@ -152,10 +156,18 @@ function mergeMatches(primaryMatches, fallbackMatches) {
         ? fallback.providerStatus
         : primary.providerStatus,
       minute: fallback.minute ?? primary.minute,
-      homeScore: fallback.homeScore ?? primary.homeScore,
-      awayScore: fallback.awayScore ?? primary.awayScore,
-      homePenalties: fallback.homePenalties ?? primary.homePenalties,
-      awayPenalties: fallback.awayPenalties ?? primary.awayPenalties,
+      homeScore: fallbackHasScore
+        ? fallback.homeScore ?? primary.homeScore
+        : primary.homeScore,
+      awayScore: fallbackHasScore
+        ? fallback.awayScore ?? primary.awayScore
+        : primary.awayScore,
+      homePenalties: fallbackHasScore
+        ? fallback.homePenalties ?? primary.homePenalties
+        : primary.homePenalties,
+      awayPenalties: fallbackHasScore
+        ? fallback.awayPenalties ?? primary.awayPenalties
+        : primary.awayPenalties,
     };
   });
 }

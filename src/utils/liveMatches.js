@@ -1,4 +1,7 @@
 const teamAliases = {
+  'bosnia and herzegovina': 'bosnia herzegovina',
+  'bosnia herzegovina': 'bosnia herzegovina',
+  'czech republic': 'czechia',
   'korea republic': 'south korea',
   'united states': 'usa',
   'united states of america': 'usa',
