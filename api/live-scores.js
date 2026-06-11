@@ -12,6 +12,16 @@ const statusMap = {
   CANCELLED: 'cancelled',
 };
 
+const statusPriority = {
+  unknown: 0,
+  upcoming: 1,
+  postponed: 2,
+  suspended: 3,
+  live: 4,
+  finished: 5,
+  cancelled: 5,
+};
+
 const normalizeFootballDataMatch = (match) => ({
   providerId: String(match.id),
   matchNumber: match.matchday ?? null,
@@ -95,6 +105,72 @@ async function fetchWorldCup26() {
   };
 }
 
+function mergeMatches(primaryMatches, fallbackMatches) {
+  const fallbackByNumber = new Map(
+    fallbackMatches.map((match) => [match.matchNumber, match]),
+  );
+
+  return primaryMatches.map((primary) => {
+    const fallback = fallbackByNumber.get(primary.matchNumber);
+
+    if (!fallback) return primary;
+
+    const fallbackHasNewerStatus =
+      (statusPriority[fallback.status] ?? 0) > (statusPriority[primary.status] ?? 0);
+
+    return {
+      ...primary,
+      status: fallbackHasNewerStatus ? fallback.status : primary.status,
+      providerStatus: fallbackHasNewerStatus
+        ? fallback.providerStatus
+        : primary.providerStatus,
+      minute: fallback.minute ?? primary.minute,
+      homeScore: fallback.homeScore ?? primary.homeScore,
+      awayScore: fallback.awayScore ?? primary.awayScore,
+      homePenalties: fallback.homePenalties ?? primary.homePenalties,
+      awayPenalties: fallback.awayPenalties ?? primary.awayPenalties,
+    };
+  });
+}
+
+async function fetchCombined() {
+  const [footballDataResult, worldCup26Result] = await Promise.allSettled([
+    fetchFootballData(),
+    fetchWorldCup26(),
+  ]);
+
+  if (footballDataResult.status === 'fulfilled'
+      && worldCup26Result.status === 'fulfilled') {
+    return {
+      source: 'football-data.org + worldcup26.ir',
+      competition: footballDataResult.value.competition,
+      matches: mergeMatches(
+        footballDataResult.value.matches,
+        worldCup26Result.value.matches,
+      ),
+      providerErrors: [],
+    };
+  }
+
+  if (footballDataResult.status === 'fulfilled') {
+    return {
+      ...footballDataResult.value,
+      providerErrors: [`worldcup26.ir: ${worldCup26Result.reason.message}`],
+    };
+  }
+
+  if (worldCup26Result.status === 'fulfilled') {
+    return {
+      ...worldCup26Result.value,
+      providerErrors: [`football-data.org: ${footballDataResult.reason.message}`],
+    };
+  }
+
+  throw new Error(
+    `Both providers failed: ${footballDataResult.reason.message}; ${worldCup26Result.reason.message}`,
+  );
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.setHeader('Allow', 'GET');
@@ -116,25 +192,18 @@ export default async function handler(request, response) {
 
   try {
     let result;
-    let fallbackReason = null;
 
     if (requestedSource === 'football-data') {
       result = await fetchFootballData();
     } else if (requestedSource === 'worldcup26') {
       result = await fetchWorldCup26();
     } else {
-      try {
-        result = await fetchFootballData();
-      } catch (error) {
-        fallbackReason = error.message;
-        result = await fetchWorldCup26();
-      }
+      result = await fetchCombined();
     }
 
     return response.status(200).json({
       ...result,
       requestedSource,
-      fallbackReason,
       fetchedAt: new Date().toISOString(),
     });
   } catch (error) {

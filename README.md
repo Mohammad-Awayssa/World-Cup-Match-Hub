@@ -19,7 +19,7 @@ server-side and falls back to worldcup26.ir if the primary provider fails.
 
 Supported endpoints:
 
-- `/api/live-scores` - football-data.org with automatic fallback
+- `/api/live-scores` - combines both feeds and keeps the freshest score/status
 - `/api/live-scores?source=football-data` - test football-data.org only
 - `/api/live-scores?source=worldcup26` - test worldcup26.ir only
 
