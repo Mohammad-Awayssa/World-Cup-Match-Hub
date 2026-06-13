@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { CountdownTimer } from '../countdown/CountdownTimer';
@@ -9,11 +8,9 @@ import backgroundMobile from '../../assets/updatedBGmobile.png';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeCity, localizeStadium, localizeTeam } from '../../i18n/entities';
 import { formatDisplayScore } from '../../utils/score';
-import HeroShare from './HeroShare';
 
 export function Hero({ match }) {
   const { language, locale, isArabic, t } = useLanguage();
-  const cardRef = useRef(null);
   if (!match) return null;
   const isLive = match.status === 'live';
   const displayScore = formatDisplayScore(match, isArabic);
@@ -31,7 +28,7 @@ export function Hero({ match }) {
       <div className="absolute inset-0 bg-gradient-to-b from-[#020814]/20 via-[#020814]/25 to-[#020814]" />
 
       <div className="section-shell relative z-10 flex min-h-[650px] flex-col items-center justify-center py-10 sm:min-h-[700px] sm:py-14">
-        <motion.div ref={cardRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }} className="match-hero-card relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] px-4 pb-5 pt-7 sm:px-10 sm:pb-7">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }} className="match-hero-card relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] px-4 pb-5 pt-7 sm:px-10 sm:pb-7">
           <div className="mb-6 flex items-center justify-center gap-4">
             <span className="h-px w-8 bg-neon sm:w-12" />
             <p className={`font-heading text-xs font-black uppercase tracking-[.18em] ${isLive ? 'text-red-400' : 'text-neon'}`}>{isLive ? t('home.matchInProgress') : t('home.nextMatch')}</p>
@@ -68,13 +65,6 @@ export function Hero({ match }) {
             worldcupmatches.online
           </p>
         </motion.div>
-        <HeroShare
-          cardRef={cardRef}
-          homeName={homeName}
-          awayName={awayName}
-          matchDate={matchDate}
-          matchTime={matchTime}
-        />
       </div>
     </section>
   );
