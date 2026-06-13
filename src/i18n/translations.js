@@ -104,9 +104,9 @@ export const translations = {
       Final: 'Final',
     },
     footer: {
-      title: 'World Cup 2026 Match Hub',
-      copy: 'Built for fans across every timezone.',
-      data: 'Static MVP data • Flags by flagcdn.com',
+      title: 'World Cup Matches Online',
+      builtBy: 'Built by Mohammad Awayssa',
+      data: 'Live match data • Flags by flagcdn.com',
       disclaimer: 'Not affiliated with FIFA.',
     },
     about: {
@@ -232,9 +232,9 @@ export const translations = {
       Final: 'النهائي',
     },
     footer: {
-      title: 'مركز مباريات كأس العالم 2026',
-      copy: 'صُمم للمشجعين في جميع المناطق الزمنية.',
-      data: 'بيانات محلية للنسخة الأولية • الأعلام من flagcdn.com',
+      title: 'World Cup Matches Online',
+      builtBy: 'بُني بواسطة Mohammad Awayssa',
+      data: 'بيانات المباريات المباشرة • الأعلام من flagcdn.com',
       disclaimer: 'مشروع غير تابع للاتحاد الدولي لكرة القدم.',
     },
     about: {
