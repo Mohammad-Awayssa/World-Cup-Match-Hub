@@ -45,7 +45,10 @@ export function Hero({ match }) {
               <FlagImage code={match.homeCode} team={homeName} large />
               <strong className="font-heading mt-4 text-lg font-black uppercase leading-tight sm:text-2xl">{homeName}</strong>
             </div>
-            <span dir="ltr" className="vs-brush font-heading text-4xl font-black italic text-neon sm:text-6xl">
+            <span
+              dir="ltr"
+              className={`font-heading text-4xl font-black text-neon sm:text-6xl ${displayScore == null ? 'vs-brush italic' : 'not-italic'}`}
+            >
               {displayScore ?? 'VS'}
             </span>
             <div className="flex min-w-0 flex-col items-center">

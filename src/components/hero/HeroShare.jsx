@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Check,
@@ -151,59 +152,74 @@ export default function HeroShare({
         {labels.button}
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            className="absolute top-14 z-30 w-[min(92vw,390px)] rounded-2xl border border-white/12 bg-[#050c17]/95 p-3 shadow-2xl backdrop-blur-xl"
-          >
-            <div className="mb-2 flex items-center justify-between px-2 py-1">
-              <p className="text-sm font-black uppercase tracking-wide text-white">
-                {labels.title}
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="rounded-full p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
-                aria-label={labels.close}
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 z-[100] grid place-items-center bg-[#020814]/75 p-4 backdrop-blur-sm"
+            >
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-label={labels.title}
+                initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 14, scale: 0.96 }}
+                onClick={(event) => event.stopPropagation()}
+                className="w-full max-w-sm rounded-2xl border border-white/12 bg-[#050c17] p-4 shadow-[0_28px_90px_rgba(0,0,0,.7)]"
               >
-                <X size={16} />
-              </button>
-            </div>
+                <div className="mb-3 flex items-center justify-between gap-4 px-1">
+                  <p className="font-heading text-sm font-black uppercase tracking-wide text-white">
+                    {labels.title}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-white/10 hover:text-white"
+                    aria-label={labels.close}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleNativeShare}
-                disabled={isBusy}
-                className="share-option"
-              >
-                {isBusy ? <LoaderCircle className="animate-spin" size={18} /> : <Share2 size={18} />}
-                {labels.apps}
-              </button>
-              <button type="button" onClick={handleWhatsApp} className="share-option">
-                <MessageCircle size={18} />
-                WhatsApp
-              </button>
-              <button type="button" onClick={handleCopy} className="share-option">
-                {copied ? <Check size={18} /> : <Link2 size={18} />}
-                {copied ? labels.copied : labels.copy}
-              </button>
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={isBusy}
-                className="share-option"
-              >
-                <Download size={18} />
-                {labels.download}
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleNativeShare}
+                    disabled={isBusy}
+                    className="share-option"
+                  >
+                    {isBusy ? <LoaderCircle className="animate-spin" size={18} /> : <Share2 size={18} />}
+                    {labels.apps}
+                  </button>
+                  <button type="button" onClick={handleWhatsApp} className="share-option">
+                    <MessageCircle size={18} />
+                    WhatsApp
+                  </button>
+                  <button type="button" onClick={handleCopy} className="share-option">
+                    {copied ? <Check size={18} /> : <Link2 size={18} />}
+                    {copied ? labels.copied : labels.copy}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={isBusy}
+                    className="share-option"
+                  >
+                    <Download size={18} />
+                    {labels.download}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </div>
   )
 }
