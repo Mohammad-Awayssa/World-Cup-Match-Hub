@@ -25,7 +25,7 @@ export default function KnockoutPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#020814]/20 via-[#020814]/55 to-[#020814]" />
         <div className="section-shell relative z-10 flex min-h-[350px] flex-col items-center justify-center py-14 text-center sm:min-h-[400px]">
           <p className="font-heading text-xs font-black uppercase tracking-[.2em] text-neon">FIFA World Cup 2026</p>
-          <h1 className="font-heading mt-3 text-5xl font-black uppercase tracking-[-.045em] sm:text-8xl">Knockout Stage</h1>
+          <h1 className="font-heading mt-3 text-5xl font-black uppercase tracking-[-.045em] sm:text-8xl">Knockout</h1>
           <p className="mt-3 text-sm text-white/55 sm:text-base">32 teams. Single elimination.</p>
         </div>
       </section>

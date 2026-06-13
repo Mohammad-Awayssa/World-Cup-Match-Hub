@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, Star } from 'lucide-react';
 import { HomeMatchRow } from '../components/home/HomeMatchRow';
 import { SearchInput } from '../components/common/SearchInput';
@@ -16,11 +16,32 @@ export default function SchedulePage() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const positioned = useRef(false);
 
   const filtered = useMemo(
     () => sortByKickoff(filterMatches(matches, filter, search, favorites, onlyFavorites)),
     [matches, filter, search, favorites, onlyFavorites],
   );
+
+  useEffect(() => {
+    if (loading || positioned.current || filter !== 'all' || search || onlyFavorites) return;
+
+    const currentMatch = filtered.find((match) => match.status === 'live')
+      ?? filtered.find((match) => (
+        match.status !== 'finished'
+        && new Date(match.kickoffUTC).getTime() >= Date.now()
+      ));
+
+    if (!currentMatch) return;
+
+    positioned.current = true;
+    window.requestAnimationFrame(() => {
+      document.getElementById(`schedule-match-${currentMatch.id}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+  }, [filter, filtered, loading, onlyFavorites, search]);
 
   return (
     <main className="groups-broadcast pb-20">
@@ -55,7 +76,7 @@ export default function SchedulePage() {
           <div className="grid gap-4 md:grid-cols-3"><LoadingCard /><LoadingCard /><LoadingCard /></div>
         ) : (
           <section className="broadcast-card overflow-hidden rounded-2xl">
-            {filtered.length ? filtered.map((match) => <HomeMatchRow key={match.id} match={match} compact />) : (
+            {filtered.length ? filtered.map((match) => <HomeMatchRow key={match.id} match={match} compact anchorId={`schedule-match-${match.id}`} />) : (
               <p className="px-6 py-16 text-center text-sm text-white/45">
                 {onlyFavorites && !favorites.length ? 'Star teams from the Groups page to build your personal schedule.' : 'No matches match these filters.'}
               </p>

@@ -75,41 +75,35 @@ button, a, select { min-height: 44px; }
 .home-broadcast { background: linear-gradient(180deg, #020814 0%, #030a14 45%, #020711 100%); }
 .groups-broadcast { background: linear-gradient(180deg, #020814 0%, #030a14 38%, #020711 100%); }
 .match-hero-card {
+  --hero-border-angle: 0turn;
   background:
     linear-gradient(145deg, rgba(5,14,25,.9), rgba(2,8,16,.84)),
     radial-gradient(circle at 50% 0%, rgba(200,255,0,.08), transparent 45%);
-  border: 1px solid transparent;
+  border: 1px solid rgba(255,255,255,.13);
   box-shadow: 0 28px 90px rgba(0,0,0,.55), inset 0 0 40px rgba(255,255,255,.025);
   backdrop-filter: blur(10px);
 }
 .match-hero-card::before {
   content: "";
   position: absolute;
-  inset: -75%;
-  z-index: 0;
+  inset: -1px;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none;
   background: conic-gradient(
-    from 0deg,
+    from var(--hero-border-angle),
     transparent 0deg 300deg,
     rgba(200,255,0,.18) 322deg,
     #C8FF00 344deg,
     transparent 360deg
   );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   animation: hero-border-spin 1.8s linear infinite;
-}
-.match-hero-card::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  z-index: 0;
-  border-radius: calc(1.75rem - 1px);
-  background:
-    linear-gradient(145deg, rgba(5,14,25,.97), rgba(2,8,16,.95)),
-    radial-gradient(circle at 50% 0%, rgba(200,255,0,.08), transparent 45%);
-  box-shadow: inset 0 0 40px rgba(255,255,255,.025);
-}
-.match-hero-card > * {
-  position: relative;
-  z-index: 1;
 }
 .vs-brush {
   text-shadow: 3px 3px 0 rgba(92,132,0,.65), 0 0 22px rgba(200,255,0,.3);
@@ -162,7 +156,12 @@ button, a, select { min-height: 44px; }
 @keyframes pulse-glow { 50% { box-shadow: 0 0 24px rgba(255,59,59,.55); } }
 @keyframes shimmer { to { background-position: 200% center; } }
 @keyframes float { 50% { transform: translateY(-10px); } }
-@keyframes hero-border-spin { to { transform: rotate(1turn); } }
+@property --hero-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0turn;
+}
+@keyframes hero-border-spin { to { --hero-border-angle: 1turn; } }
 .live-glow { animation: pulse-glow 2s infinite; }
 .float { animation: float 6s ease-in-out infinite; }
 
