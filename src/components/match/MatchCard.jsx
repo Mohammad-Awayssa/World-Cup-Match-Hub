@@ -5,6 +5,7 @@ import { FlagImage } from '../common/FlagImage';
 import { formatLocalDate, formatLocalTime } from '../../utils/time';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeCity, localizeStage, localizeStadium, localizeTeam } from '../../i18n/entities';
+import { formatDisplayScore } from '../../utils/score';
 
 function Team({ name, code, favorited, onToggle }) {
   const { language, t } = useLanguage();
@@ -25,8 +26,9 @@ function Team({ name, code, favorited, onToggle }) {
 }
 
 export const MatchCard = memo(function MatchCard({ match, favorites, onToggleFavorite, featured = false }) {
-  const { language, locale, t } = useLanguage();
+  const { language, locale, isArabic, t } = useLanguage();
   const live = match.status === 'live';
+  const displayScore = formatDisplayScore(match, isArabic);
   return (
     <motion.article
       initial={{ opacity: 0, y: 18 }}
@@ -42,7 +44,7 @@ export const MatchCard = memo(function MatchCard({ match, favorites, onToggleFav
       <div className="flex items-start gap-3">
         <Team name={match.homeTeam} code={match.homeCode} favorited={favorites.includes(match.homeCode)} onToggle={onToggleFavorite} />
         <div dir="ltr" className="font-heading mt-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-text-secondary">
-          {match.homeScore === null ? 'VS' : `${match.homeScore}-${match.awayScore}`}
+          {displayScore ?? 'VS'}
         </div>
         <Team name={match.awayTeam} code={match.awayCode} favorited={favorites.includes(match.awayCode)} onToggle={onToggleFavorite} />
       </div>

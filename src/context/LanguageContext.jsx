@@ -13,6 +13,11 @@ const getInitialLanguage = () => {
 
 const readPath = (object, path) => path.split('.').reduce((value, key) => value?.[key], object);
 
+const updateMeta = (selector, content) => {
+  const element = document.head.querySelector(selector);
+  if (element) element.setAttribute('content', content);
+};
+
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(getInitialLanguage);
   const isArabic = language === 'ar';
@@ -20,7 +25,20 @@ export function LanguageProvider({ children }) {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = isArabic ? 'rtl' : 'ltr';
-    document.title = translations[language].footer.title;
+    const title = isArabic
+      ? 'مباريات كأس العالم 2026 | النتائج المباشرة والجدول والترتيب'
+      : 'World Cup Matches Online | Live Scores, Schedule & Standings';
+    const description = isArabic
+      ? 'تابع نتائج مباريات كأس العالم 2026 مباشرة، وجدول المباريات بالتوقيت المحلي، وترتيب المجموعات، والأدوار الإقصائية.'
+      : 'Follow World Cup 2026 live scores, local kickoff times, the complete match schedule, group standings, and knockout fixtures.';
+
+    document.title = title;
+    updateMeta('meta[name="description"]', description);
+    updateMeta('meta[property="og:title"]', title);
+    updateMeta('meta[property="og:description"]', description);
+    updateMeta('meta[property="og:locale"]', isArabic ? 'ar_PS' : 'en_US');
+    updateMeta('meta[name="twitter:title"]', title);
+    updateMeta('meta[name="twitter:description"]', description);
     try {
       localStorage.setItem('wc2026-language', language);
     } catch {

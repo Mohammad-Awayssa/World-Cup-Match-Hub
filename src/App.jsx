@@ -8,6 +8,7 @@ import GroupsPage from './pages/GroupsPage';
 import KnockoutPage from './pages/KnockoutPage';
 import AboutPage from './pages/AboutPage';
 import { LanguageProvider } from './context/LanguageContext';
+import ScrollManager from './components/layout/ScrollManager';
 
 function RoutedApp() {
   return (
@@ -28,7 +29,12 @@ function RoutedApp() {
 export default function App() {
   return (
     <LanguageProvider>
-      <DataProvider><HashRouter><RoutedApp /></HashRouter></DataProvider>
+      <DataProvider>
+        <HashRouter>
+          <ScrollManager />
+          <RoutedApp />
+        </HashRouter>
+      </DataProvider>
     </LanguageProvider>
   );
 }

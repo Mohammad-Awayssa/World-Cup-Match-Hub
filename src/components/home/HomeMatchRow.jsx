@@ -3,10 +3,11 @@ import { FlagImage } from '../common/FlagImage';
 import { formatLocalDate, formatLocalTime } from '../../utils/time';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeStage, localizeStadium, localizeTeam } from '../../i18n/entities';
+import { formatDisplayScore } from '../../utils/score';
 
 export function HomeMatchRow({ match, compact = false, anchorId }) {
-  const { language, locale, t } = useLanguage();
-  const hasScore = Number.isFinite(match.homeScore) && Number.isFinite(match.awayScore);
+  const { language, locale, isArabic, t } = useLanguage();
+  const displayScore = formatDisplayScore(match, isArabic);
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
 
@@ -22,7 +23,7 @@ export function HomeMatchRow({ match, compact = false, anchorId }) {
           <FlagImage code={match.homeCode} team={localizeTeam(match.homeTeam, match.homeCode, language)} small />
         </div>
         <span dir="ltr" className={`font-heading px-1 text-sm font-black sm:px-2 sm:text-base ${isLive ? 'text-red-400' : isFinished ? 'text-slate-200' : 'text-neon'}`}>
-          {hasScore ? `${match.homeScore}-${match.awayScore}` : 'VS'}
+          {displayScore ?? 'VS'}
         </span>
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <FlagImage code={match.awayCode} team={localizeTeam(match.awayTeam, match.awayCode, language)} small />
