@@ -10,7 +10,6 @@ export const formatLocalTime = (iso) =>
   new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
     minute: '2-digit',
-    timeZoneName: 'short',
   }).format(new Date(iso));
 
 export const isToday = (iso) => {
