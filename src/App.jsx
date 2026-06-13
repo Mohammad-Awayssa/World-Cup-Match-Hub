@@ -7,6 +7,7 @@ import SchedulePage from './pages/SchedulePage';
 import GroupsPage from './pages/GroupsPage';
 import KnockoutPage from './pages/KnockoutPage';
 import AboutPage from './pages/AboutPage';
+import { LanguageProvider } from './context/LanguageContext';
 
 function RoutedApp() {
   return (
@@ -25,5 +26,9 @@ function RoutedApp() {
 }
 
 export default function App() {
-  return <DataProvider><HashRouter><RoutedApp /></HashRouter></DataProvider>;
+  return (
+    <LanguageProvider>
+      <DataProvider><HashRouter><RoutedApp /></HashRouter></DataProvider>
+    </LanguageProvider>
+  );
 }

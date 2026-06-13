@@ -1,13 +1,13 @@
-export const formatLocalDate = (iso, options = {}) =>
-  new Intl.DateTimeFormat(undefined, {
+export const formatLocalDate = (iso, options = {}, locale) =>
+  new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     ...options,
   }).format(new Date(iso));
 
-export const formatLocalTime = (iso) =>
-  new Intl.DateTimeFormat(undefined, {
+export const formatLocalTime = (iso, locale) =>
+  new Intl.DateTimeFormat(locale, {
     hour: 'numeric',
     minute: '2-digit',
   }).format(new Date(iso));

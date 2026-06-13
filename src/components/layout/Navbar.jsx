@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Languages, Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import worldCupLogo from '../../assets/wordcuplogo.png';
+import { useLanguage } from '../../hooks/useLanguage';
 
 const links = [
-  ['/', 'Matches', true],
-  ['/groups', 'Groups', true],
-  ['/knockout', 'Knockout', true],
-  ['/schedule', 'Schedule', true],
+  ['/', 'nav.matches'],
+  ['/groups', 'nav.groups'],
+  ['/knockout', 'nav.knockout'],
+  ['/schedule', 'nav.schedule'],
 ];
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { t, toggleLanguage } = useLanguage();
   const linkClass = ({ isActive }) => `nav-link relative flex items-center px-3 text-sm font-semibold transition-colors ${isActive ? 'active text-white' : 'text-white/65 hover:text-white'}`;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[.08] bg-[#030914]/92 backdrop-blur-xl">
-      <nav className="section-shell flex h-18 items-center justify-between" aria-label="Main navigation">
+      <nav className="section-shell flex h-18 items-center justify-between" aria-label={t('nav.main')}>
         <NavLink to="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <img
             src={worldCupLogo}
@@ -26,24 +28,33 @@ export function Navbar() {
           />
         </NavLink>
 
-        <div className="hidden h-full gap-5 md:flex">
-          {links.map(([to, label]) => (
-            <NavLink key={label} to={to} end={to === '/'} className={linkClass}>{label}</NavLink>
+        <div className="hidden h-full items-center gap-3 lg:flex">
+          {links.map(([to, labelKey]) => (
+            <NavLink key={labelKey} to={to} end={to === '/'} className={linkClass}>{t(labelKey)}</NavLink>
           ))}
+          <button type="button" onClick={toggleLanguage} className="ms-2 flex h-10 min-h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[.05] px-3 text-xs font-bold text-white/75 transition hover:border-neon/35 hover:text-neon" aria-label={t('language.switchTo')}>
+            <Languages size={16} />
+            <span>{t('language.switchTo')}</span>
+          </button>
         </div>
 
-        <button className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 md:hidden" onClick={() => setOpen(!open)} aria-label="Toggle navigation">
-          {open ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <button type="button" onClick={toggleLanguage} className="grid h-11 min-h-11 min-w-11 place-items-center rounded-xl border border-white/10 bg-white/5 px-2 text-xs font-black text-neon" aria-label={t('language.switchTo')}>
+            {t('language.switchTo')}
+          </button>
+          <button className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5" onClick={() => setOpen(!open)} aria-label={t('nav.toggle')}>
+            {open ? <X /> : <Menu />}
+          </button>
+        </div>
       </nav>
 
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-white/[.06] bg-[#030914] md:hidden">
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-white/[.06] bg-[#030914] lg:hidden">
             <div className="section-shell flex flex-col py-3">
-              {links.map(([to, label], index) => (
-                <NavLink key={`${label}-${index}`} to={to} end={to === '/'} className={({ isActive }) => `rounded-xl px-4 py-3 text-sm font-semibold ${isActive ? 'bg-neon/10 text-neon' : 'text-text-secondary'}`} onClick={() => setOpen(false)}>
-                  {label}
+              {links.map(([to, labelKey], index) => (
+                <NavLink key={`${labelKey}-${index}`} to={to} end={to === '/'} className={({ isActive }) => `rounded-xl px-4 py-3 text-sm font-semibold ${isActive ? 'bg-neon/10 text-neon' : 'text-text-secondary'}`} onClick={() => setOpen(false)}>
+                  {t(labelKey)}
                 </NavLink>
               ))}
             </div>
