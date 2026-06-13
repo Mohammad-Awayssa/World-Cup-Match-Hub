@@ -70,6 +70,8 @@ const teamAliases = {
   'bosnia herzegovina': 'bosnia herzegovina',
   'czech republic': 'czechia',
   'korea republic': 'south korea',
+  turkey: 'turkiye',
+  turkiye: 'turkiye',
   'united states': 'usa',
   'united states of america': 'usa',
 };
@@ -131,16 +133,12 @@ async function fetchWorldCup26() {
 }
 
 function mergeMatches(primaryMatches, fallbackMatches) {
-  const fallbackByNumber = new Map(
-    fallbackMatches.map((match) => [match.matchNumber, match]),
-  );
   const fallbackByTeams = new Map(
     fallbackMatches.map((match) => [matchKey(match), match]),
   );
 
   return primaryMatches.map((primary) => {
-    const fallback = fallbackByTeams.get(matchKey(primary))
-      ?? fallbackByNumber.get(primary.matchNumber);
+    const fallback = fallbackByTeams.get(matchKey(primary));
 
     if (!fallback) return primary;
 

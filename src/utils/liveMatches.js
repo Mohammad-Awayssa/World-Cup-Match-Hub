@@ -3,6 +3,8 @@ const teamAliases = {
   'bosnia herzegovina': 'bosnia herzegovina',
   'czech republic': 'czechia',
   'korea republic': 'south korea',
+  turkey: 'turkiye',
+  turkiye: 'turkiye',
   'united states': 'usa',
   'united states of america': 'usa',
 };
@@ -39,15 +41,9 @@ export const inferMatchStatus = (match, now = Date.now()) => {
 
 export const mergeLiveMatches = (localMatches, liveMatches, now = Date.now()) => {
   const liveByTeams = new Map(liveMatches.map((match) => [matchKey(match), match]));
-  const liveByNumber = new Map(
-    liveMatches
-      .filter((match) => match.matchNumber)
-      .map((match) => [Number(match.matchNumber), match]),
-  );
 
   return localMatches.map((localMatch) => {
-    const liveMatch = liveByTeams.get(matchKey(localMatch))
-      ?? liveByNumber.get(localMatch.matchNumber);
+    const liveMatch = liveByTeams.get(matchKey(localMatch));
     const merged = liveMatch
       ? {
           ...localMatch,
