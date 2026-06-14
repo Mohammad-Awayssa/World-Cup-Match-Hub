@@ -20,7 +20,7 @@ export function CountdownTimer({ target, status }) {
     return <div className="font-heading text-center text-2xl font-black uppercase tracking-[.12em] text-red-400 drop-shadow-[0_0_12px_rgba(248,113,113,.45)]">{t('common.liveNow')}</div>;
   }
   return (
-    <div aria-live="polite" aria-label={t('countdown.aria')} className="flex justify-center">
+    <div dir="ltr" aria-live="polite" aria-label={t('countdown.aria')} className="flex justify-center">
       <CountdownBox value={countdown.days} label={t('countdown.days')} />
       <CountdownBox value={countdown.hours} label={t('countdown.hours')} />
       <CountdownBox value={countdown.minutes} label={t('countdown.mins')} />
