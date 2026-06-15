@@ -68,7 +68,10 @@ const normalizeWorldCup26Match = (match) => ({
 const teamAliases = {
   'bosnia and herzegovina': 'bosnia herzegovina',
   'bosnia herzegovina': 'bosnia herzegovina',
+  'cape verde islands': 'cape verde',
+  'cote d ivoire': 'cote d ivoire',
   'czech republic': 'czechia',
+  'ivory coast': 'cote d ivoire',
   'korea republic': 'south korea',
   turkey: 'turkiye',
   turkiye: 'turkiye',
