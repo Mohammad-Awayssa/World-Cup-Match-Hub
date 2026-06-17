@@ -31,12 +31,13 @@ const matchKey = (match) => [
   normalizeTeamName(match.awayTeam),
 ].join('|');
 
-export const inferMatchStatus = (match, now = Date.now()) => {
+export const inferMatchStatus = (match, now = Date.now(), inferScheduledStatus = true) => {
   if (['finished', 'cancelled', 'postponed', 'suspended'].includes(match.status)) {
     return match.status;
   }
 
   if (match.status === 'live') return 'live';
+  if (!inferScheduledStatus) return match.status ?? 'upcoming';
 
   const kickoff = new Date(match.kickoffUTC).getTime();
   const assumedMatchEnd = kickoff + (3 * 60 * 60 * 1000);
@@ -45,7 +46,12 @@ export const inferMatchStatus = (match, now = Date.now()) => {
   return match.status ?? 'upcoming';
 };
 
-export const mergeLiveMatches = (localMatches, liveMatches, now = Date.now()) => {
+export const mergeLiveMatches = (
+  localMatches,
+  liveMatches,
+  now = Date.now(),
+  { inferScheduledStatus = liveMatches.length > 0 } = {},
+) => {
   const liveByTeams = new Map(liveMatches.map((match) => [matchKey(match), match]));
 
   return localMatches.map((localMatch) => {
@@ -65,7 +71,7 @@ export const mergeLiveMatches = (localMatches, liveMatches, now = Date.now()) =>
 
     return {
       ...merged,
-      status: inferMatchStatus(merged, now),
+      status: inferMatchStatus(merged, now, inferScheduledStatus),
     };
   });
 };

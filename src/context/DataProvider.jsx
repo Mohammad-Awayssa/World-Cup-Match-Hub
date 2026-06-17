@@ -9,6 +9,9 @@ import { mergeLiveMatches } from '../utils/liveMatches';
 
 export const DataContext = createContext(null);
 
+const LIVE_CACHE_KEY = 'wc2026-live-matches-cache';
+const LIVE_CACHE_TTL_MS = 2 * 60 * 1000;
+
 const scheduleMetadata = {
   lastUpdated: matchesDocument.lastUpdated,
   source: matchesDocument.source,
@@ -23,10 +26,35 @@ const buildState = (matches) => ({
   error: null,
 });
 
-const getBaseMatches = () => mergeLiveMatches(matchesDocument.matches, []);
+const getBaseMatches = () => mergeLiveMatches(matchesDocument.matches, [], Date.now(), {
+  inferScheduledStatus: false,
+});
+
+const readCachedMatches = () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(LIVE_CACHE_KEY));
+    if (!cached?.matches || Date.now() - cached.savedAt > LIVE_CACHE_TTL_MS) {
+      return null;
+    }
+    return cached.matches;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedMatches = (matches) => {
+  try {
+    localStorage.setItem(LIVE_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      matches,
+    }));
+  } catch {
+    // Live updates still work when browser storage is unavailable.
+  }
+};
 
 export function DataProvider({ children }) {
-  const [state, setState] = useState(() => buildState(getBaseMatches()));
+  const [state, setState] = useState(() => buildState(readCachedMatches() ?? getBaseMatches()));
 
   useEffect(() => {
     let active = true;
@@ -35,6 +63,7 @@ export function DataProvider({ children }) {
     const refreshLiveScores = async () => {
       try {
         const matches = await matchService.getLiveMatches();
+        writeCachedMatches(matches);
         if (active) setState(buildState(matches));
       } catch {
         if (active) setState((current) => ({ ...current, loading: false, error: null }));

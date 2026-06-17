@@ -6,7 +6,9 @@ import { mergeLiveMatches } from '../../utils/liveMatches';
 const clone = (value) => structuredClone(value);
 const matches = matchesDocument.matches;
 
-const getBaseMatches = () => mergeLiveMatches(matches, []);
+const getBaseMatches = () => mergeLiveMatches(matches, [], Date.now(), {
+  inferScheduledStatus: false,
+});
 
 const getMatchesWithLiveData = async () => {
   try {
