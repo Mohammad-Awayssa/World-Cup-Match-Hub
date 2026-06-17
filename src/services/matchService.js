@@ -6,6 +6,7 @@ const adapter = config.USE_LIVE_API ? apiAdapter : localAdapter;
 
 export const matchService = {
   getAllMatches: () => adapter.getAllMatches(),
+  getLiveMatches: () => adapter.getLiveMatches?.() ?? adapter.getAllMatches(),
   getScheduleMetadata: () => adapter.getScheduleMetadata(),
   getMatchById: (id) => adapter.getMatchById(id),
   getMatchesByStage: (stage) => adapter.getMatchesByStage(stage),

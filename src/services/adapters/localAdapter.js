@@ -6,6 +6,8 @@ import { mergeLiveMatches } from '../../utils/liveMatches';
 const clone = (value) => structuredClone(value);
 const matches = matchesDocument.matches;
 
+const getBaseMatches = () => mergeLiveMatches(matches, []);
+
 const getMatchesWithLiveData = async () => {
   try {
     const response = await fetch('/api/live-scores');
@@ -13,12 +15,13 @@ const getMatchesWithLiveData = async () => {
     const data = await response.json();
     return mergeLiveMatches(matches, data.matches ?? []);
   } catch {
-    return mergeLiveMatches(matches, []);
+    return getBaseMatches();
   }
 };
 
 export const localAdapter = {
-  getAllMatches: async () => clone(await getMatchesWithLiveData()),
+  getAllMatches: async () => clone(getBaseMatches()),
+  getLiveMatches: async () => clone(await getMatchesWithLiveData()),
   getScheduleMetadata: async () => clone({
     lastUpdated: matchesDocument.lastUpdated,
     source: matchesDocument.source,

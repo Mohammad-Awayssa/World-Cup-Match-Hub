@@ -6,6 +6,7 @@ const unavailable = async () => {
 
 export const apiAdapter = {
   getAllMatches: unavailable,
+  getLiveMatches: unavailable,
   getScheduleMetadata: unavailable,
   getMatchById: unavailable,
   getMatchesByStage: unavailable,

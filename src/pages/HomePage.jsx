@@ -1,7 +1,6 @@
 import { ArrowRight, CalendarOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Hero } from '../components/hero/Hero';
-import { LoadingCard } from '../components/common/LoadingCard';
 import { HomeMatchRow } from '../components/home/HomeMatchRow';
 import { QuickActions } from '../components/home/QuickActions';
 import { TournamentJourney } from '../components/home/TournamentJourney';
@@ -25,12 +24,29 @@ function SectionHeader({ title, to = '/schedule', linkLabel }) {
   );
 }
 
+function HomeLoadingState() {
+  return (
+    <main className="home-broadcast pb-20">
+      <section className="relative overflow-hidden border-b border-white/[.06]">
+        <div className="section-shell flex min-h-[650px] flex-col items-center justify-center py-10 sm:min-h-[700px] sm:py-14">
+          <div className="match-hero-card h-[360px] w-full max-w-3xl animate-pulse rounded-[1.75rem] sm:h-[430px]" />
+        </div>
+      </section>
+      <div className="section-shell mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-3 lg:grid-cols-5">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div key={index} className="broadcast-card min-h-36 animate-pulse rounded-2xl" />
+        ))}
+      </div>
+    </main>
+  );
+}
+
 export default function HomePage() {
   const { t } = useLanguage();
   const { matches, loading, error } = useMatchData();
 
   if (error) return <main className="section-shell py-24 text-center text-red-300">{error}</main>;
-  if (loading) return <main className="section-shell grid gap-4 py-24 md:grid-cols-3"><LoadingCard /><LoadingCard /><LoadingCard /></main>;
+  if (loading) return <HomeLoadingState />;
 
   const sorted = sortByKickoff(matches);
   const nextMatch = getNextMatch(sorted);
