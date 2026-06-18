@@ -9,7 +9,7 @@ import { mergeLiveMatches } from '../utils/liveMatches';
 
 export const DataContext = createContext(null);
 
-const LIVE_CACHE_KEY = 'wc2026-live-matches-cache';
+const LIVE_CACHE_KEY = 'wc2026-live-matches-cache-v2';
 const LIVE_CACHE_TTL_MS = 2 * 60 * 1000;
 
 const scheduleMetadata = {
@@ -17,12 +17,12 @@ const scheduleMetadata = {
   source: matchesDocument.source,
 };
 
-const buildState = (matches) => ({
+const buildState = (matches, loading = false) => ({
   matches,
   groups: calculateGroupStandings(baseGroups, matches),
   stadiums,
   scheduleMetadata,
-  loading: false,
+  loading,
   error: null,
 });
 
@@ -54,7 +54,10 @@ const writeCachedMatches = (matches) => {
 };
 
 export function DataProvider({ children }) {
-  const [state, setState] = useState(() => buildState(readCachedMatches() ?? getBaseMatches()));
+  const [state, setState] = useState(() => {
+    const cachedMatches = readCachedMatches();
+    return buildState(cachedMatches ?? getBaseMatches(), !cachedMatches);
+  });
 
   useEffect(() => {
     let active = true;

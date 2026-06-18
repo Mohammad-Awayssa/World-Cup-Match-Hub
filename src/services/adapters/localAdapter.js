@@ -11,14 +11,13 @@ const getBaseMatches = () => mergeLiveMatches(matches, [], Date.now(), {
 });
 
 const getMatchesWithLiveData = async () => {
-  try {
-    const response = await fetch('/api/live-scores');
-    if (!response.ok) throw new Error(`Live scores returned ${response.status}`);
-    const data = await response.json();
-    return mergeLiveMatches(matches, data.matches ?? []);
-  } catch {
-    return getBaseMatches();
+  const response = await fetch('/api/live-scores');
+  if (!response.ok) throw new Error(`Live scores returned ${response.status}`);
+  const data = await response.json();
+  if (!Array.isArray(data.matches) || !data.matches.length) {
+    throw new Error('Live scores returned no matches');
   }
+  return mergeLiveMatches(matches, data.matches);
 };
 
 export const localAdapter = {
