@@ -20,9 +20,9 @@ export const isToday = (iso) => {
     && date.getDate() === now.getDate();
 };
 
-export const getNextMatch = (matches) => {
+export const getNextMatches = (matches) => {
   const now = Date.now();
-  return [...matches]
+  const candidates = [...matches]
     .filter((match) => (
       match.status === 'live'
       || (
@@ -34,7 +34,17 @@ export const getNextMatch = (matches) => {
       if (a.status === 'live' && b.status !== 'live') return -1;
       if (b.status === 'live' && a.status !== 'live') return 1;
       return new Date(a.kickoffUTC) - new Date(b.kickoffUTC);
-    })[0] ?? matches.at(-1);
+    });
+
+  const firstMatch = candidates[0] ?? matches.at(-1);
+  if (!firstMatch) return [];
+
+  const firstKickoff = new Date(firstMatch.kickoffUTC).getTime();
+  return candidates.length
+    ? candidates.filter((match) => new Date(match.kickoffUTC).getTime() === firstKickoff)
+    : [firstMatch];
 };
+
+export const getNextMatch = (matches) => getNextMatches(matches)[0];
 
 export const daysUntil = (iso) => Math.max(0, Math.ceil((new Date(iso) - Date.now()) / 86400000));

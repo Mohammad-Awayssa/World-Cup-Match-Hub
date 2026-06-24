@@ -6,7 +6,7 @@ import { QuickActions } from '../components/home/QuickActions';
 import { TournamentJourney } from '../components/home/TournamentJourney';
 import { UpcomingMatches } from '../components/home/UpcomingMatches';
 import { useMatchData } from '../hooks/useMatchData';
-import { getNextMatch, isToday } from '../utils/time';
+import { getNextMatches, isToday } from '../utils/time';
 import { sortByKickoff } from '../utils/matchHelpers';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -24,12 +24,12 @@ function SectionHeader({ title, to = '/schedule', linkLabel }) {
   );
 }
 
-function HomeLoadingState() {
+function HomeLoadingState({ multiple = false }) {
   return (
     <main className="home-broadcast pb-20">
       <section className="relative overflow-hidden border-b border-white/[.06]">
         <div className="section-shell flex min-h-[650px] flex-col items-center justify-center py-10 sm:min-h-[700px] sm:py-14">
-          <div className="match-hero-card h-[360px] w-full max-w-3xl animate-pulse rounded-[1.75rem] sm:h-[430px]" />
+          <div className={`match-hero-card w-full animate-pulse rounded-[1.75rem] ${multiple ? 'h-[720px] max-w-6xl md:h-[520px]' : 'h-[360px] max-w-3xl sm:h-[430px]'}`} />
         </div>
       </section>
       <div className="section-shell mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-3 lg:grid-cols-5">
@@ -44,18 +44,18 @@ function HomeLoadingState() {
 export default function HomePage() {
   const { t } = useLanguage();
   const { matches, loading, error } = useMatchData();
+  const sorted = sortByKickoff(matches);
+  const nextMatches = getNextMatches(sorted);
 
   if (error) return <main className="section-shell py-24 text-center text-red-300">{error}</main>;
-  if (loading) return <HomeLoadingState />;
+  if (loading) return <HomeLoadingState multiple={nextMatches.length > 1} />;
 
-  const sorted = sortByKickoff(matches);
-  const nextMatch = getNextMatch(sorted);
   const today = sorted.filter((match) => isToday(match.kickoffUTC));
   const upcoming = sorted.filter((match) => match.status === 'live' || new Date(match.kickoffUTC) >= new Date());
 
   return (
     <main className="home-broadcast pb-20">
-      <Hero match={nextMatch} />
+      <Hero matches={nextMatches} />
       <QuickActions />
 
       <div className="section-shell mt-12 space-y-8">

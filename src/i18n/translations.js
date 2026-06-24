@@ -21,7 +21,9 @@ export const translations = {
     },
     home: {
       nextMatch: 'Next Match',
+      nextMatches: 'Next Matches',
       matchInProgress: 'Match In Progress',
+      matchesInProgress: 'Matches In Progress',
       todaysMatches: "Today's Matches",
       noMatchesToday: 'No matches today',
       noMatchesTodayCopy: 'The tournament kicks off on the next matchday.',
@@ -149,7 +151,9 @@ export const translations = {
     },
     home: {
       nextMatch: 'المباراة القادمة',
+      nextMatches: 'المباريات القادمة',
       matchInProgress: 'المباراة جارية الآن',
+      matchesInProgress: 'المباريات جارية الآن',
       todaysMatches: 'مباريات اليوم',
       noMatchesToday: 'لا توجد مباريات اليوم',
       noMatchesTodayCopy: 'تنطلق البطولة في يوم المباريات القادم.',
