@@ -3,7 +3,11 @@ import { CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HomeMatchRow } from './HomeMatchRow';
 import { useLanguage } from '../../hooks/useLanguage';
-import { localDateKey } from '../../utils/time';
+
+const dateKey = (date) => {
+  const value = new Date(date);
+  return `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+};
 
 export function UpcomingMatches({ matches }) {
   const { locale, t } = useLanguage();
@@ -13,20 +17,20 @@ export function UpcomingMatches({ matches }) {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const fixedKeys = new Set([localDateKey(today), localDateKey(tomorrow)]);
-    const laterDates = [...new Map(matches.map((match) => [localDateKey(match.kickoffUTC), match.kickoffUTC])).entries()]
+    const fixedKeys = new Set([dateKey(today), dateKey(tomorrow)]);
+    const laterDates = [...new Map(matches.map((match) => [dateKey(match.kickoffUTC), match.kickoffUTC])).entries()]
       .filter(([key]) => !fixedKeys.has(key))
       .slice(0, 4);
     return [
       ['all', t('home.all')],
-      [localDateKey(today), t('home.today')],
-      [localDateKey(tomorrow), t('home.tomorrow')],
+      [dateKey(today), t('home.today')],
+      [dateKey(tomorrow), t('home.tomorrow')],
       ...laterDates.map(([key, date]) => [key, pillLabel(date)]),
     ];
   }, [locale, matches, t]);
   const filtered = selected === 'all'
     ? matches.slice(0, 4)
-    : matches.filter((match) => localDateKey(match.kickoffUTC) === selected);
+    : matches.filter((match) => dateKey(match.kickoffUTC) === selected).slice(0, 4);
 
   return (
     <section className="broadcast-card rounded-2xl p-4 sm:p-6">
