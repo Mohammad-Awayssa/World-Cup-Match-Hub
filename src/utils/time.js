@@ -20,6 +20,21 @@ export const isToday = (iso) => {
     && date.getDate() === now.getDate();
 };
 
+export const localDateKey = (date) => {
+  const value = new Date(date);
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${value.getFullYear()}-${month}-${day}`;
+};
+
+export const matchdayKey = (date, cutoffHour = 6) => {
+  const value = new Date(date);
+  if (value.getHours() < cutoffHour) value.setDate(value.getDate() - 1);
+  return localDateKey(value);
+};
+
+export const isTodayMatchday = (iso) => matchdayKey(iso) === matchdayKey(new Date());
+
 export const getNextMatches = (matches) => {
   const now = Date.now();
   const candidates = [...matches]

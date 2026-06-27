@@ -26,6 +26,8 @@ const stageDates = {
 const CARD_WIDTH = 278;
 const CARD_HEIGHT = 138;
 const COLUMN_GAP = 104;
+const COMPRESSED_COLUMN_GAP = 34;
+const FOCUS_COLUMN_GAP = 138;
 const ROW_GAP = 164;
 const HEADER_HEIGHT = 64;
 const BOARD_PADDING = 18;
@@ -47,7 +49,9 @@ const extractWinnerMatchNumber = (value = '') => {
 
 const isPlaceholderTeam = (name = '') => /^(Winner|Runner-up|Loser|3rd Place)/.test(String(name));
 
-const buildBracketLayout = (matches, isRtl) => {
+const stageIndex = new Map(stageOrder.map((stage, index) => [stage, index]));
+
+const buildBracketLayout = (matches, isRtl, activeStage = 'Round of 32') => {
   const bracketMatches = matches
     .filter((match) => stageOrder.includes(match.stage))
     .sort((a, b) => a.matchNumber - b.matchNumber);
@@ -107,14 +111,33 @@ const buildBracketLayout = (matches, isRtl) => {
   };
 
   const visualStages = isRtl ? [...stageOrder].reverse() : stageOrder;
-  const stageX = new Map(
-    visualStages.map((stage, index) => [stage, BOARD_PADDING + index * (CARD_WIDTH + COLUMN_GAP)]),
-  );
+  const activeIndex = stageIndex.get(activeStage) ?? 0;
+  const stageX = new Map();
+  let cursorX = BOARD_PADDING;
+
+  visualStages.forEach((stage, index) => {
+    stageX.set(stage, cursorX);
+    const nextStage = visualStages[index + 1];
+    if (!nextStage) return;
+
+    const currentStageIndex = stageIndex.get(stage) ?? 0;
+    const nextStageIndex = stageIndex.get(nextStage) ?? 0;
+    const gap = Math.max(currentStageIndex, nextStageIndex) <= activeIndex
+      ? COMPRESSED_COLUMN_GAP
+      : currentStageIndex === activeIndex || nextStageIndex === activeIndex
+        ? FOCUS_COLUMN_GAP
+        : COLUMN_GAP;
+
+    cursorX += CARD_WIDTH + gap;
+  });
 
   const positionedMatches = bracketMatches.map((match) => ({
     match,
     x: stageX.get(match.stage),
     y: HEADER_HEIGHT + centerForMatch(match) - CARD_HEIGHT / 2,
+    stageDistance: Math.abs((stageIndex.get(match.stage) ?? 0) - activeIndex),
+    isActiveStage: match.stage === activeStage,
+    isCompressedStage: (stageIndex.get(match.stage) ?? 0) < activeIndex,
     nextMatch: nextByMatch.get(match.matchNumber) ?? null,
   }));
 
@@ -122,9 +145,7 @@ const buildBracketLayout = (matches, isRtl) => {
     positionedMatches.map((item) => [item.match.matchNumber, item]),
   );
 
-  const width = (visualStages.length * CARD_WIDTH)
-    + ((visualStages.length - 1) * COLUMN_GAP)
-    + (BOARD_PADDING * 2);
+  const width = cursorX + BOARD_PADDING;
   const height = HEADER_HEIGHT + Math.max(leaves.length - 1, 0) * ROW_GAP + CARD_HEIGHT + 42;
 
   const connectors = positionedMatches
@@ -152,6 +173,7 @@ const buildBracketLayout = (matches, isRtl) => {
     connectors,
     width,
     height,
+    activeStage,
     columnLeft: (stage) => stageX.get(stage),
   };
 };
@@ -196,12 +218,22 @@ function KnockoutMatchCard({ item, index }) {
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
+      }}
+      animate={{
         left: item.x,
         top: item.y,
+        scale: item.isActiveStage ? 1.03 : item.isCompressedStage ? 0.92 : 0.98,
+        opacity: item.isActiveStage ? 1 : item.isCompressedStage ? 0.66 : 0.86,
+        filter: item.isActiveStage ? 'saturate(1.08)' : 'saturate(.82)',
       }}
       initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, delay: Math.min(index * 0.015, 0.25) }}
+      transition={{
+        type: 'spring',
+        stiffness: 130,
+        damping: 24,
+        mass: 0.9,
+        delay: Math.min(index * 0.006, 0.08),
+      }}
       whileHover={{ y: -3 }}
       tabIndex={0}
       aria-label={`${localizeTeam(match.homeTeam, match.homeCode, language)} versus ${localizeTeam(match.awayTeam, match.awayCode, language)}`}
@@ -253,17 +285,23 @@ export function KnockoutStage({ matches }) {
     [matches],
   );
   const thirdPlace = matches.find((match) => match.stage === 'Third Place');
-  const layout = useMemo(() => buildBracketLayout(bracketMatches, isRtl), [bracketMatches, isRtl]);
+  const layout = useMemo(
+    () => buildBracketLayout(bracketMatches, isRtl, activeStage),
+    [activeStage, bracketMatches, isRtl],
+  );
 
   const focusStage = (stage) => {
+    const focusedLayout = buildBracketLayout(bracketMatches, isRtl, stage);
     setActiveStage(stage);
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
-    const stageLeft = layout.columnLeft(stage);
-    scroller.scrollTo({
-      left: Math.max(stageLeft - (scroller.clientWidth - CARD_WIDTH) / 2, 0),
-      behavior: 'smooth',
+    window.requestAnimationFrame(() => {
+      const stageLeft = focusedLayout.columnLeft(stage);
+      scroller.scrollTo({
+        left: Math.max(stageLeft - (scroller.clientWidth - CARD_WIDTH) / 2, 0),
+        behavior: 'smooth',
+      });
     });
   };
 
@@ -272,7 +310,8 @@ export function KnockoutStage({ matches }) {
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
-    const stageLeft = layout.columnLeft('Round of 32');
+    const focusedLayout = buildBracketLayout(bracketMatches, isRtl, 'Round of 32');
+    const stageLeft = focusedLayout.columnLeft('Round of 32');
     window.requestAnimationFrame(() => {
       scroller.scrollTo({
         left: Math.max(stageLeft - (scroller.clientWidth - CARD_WIDTH) / 2, 0),
@@ -380,20 +419,25 @@ export function KnockoutStage({ matches }) {
             }}
           >
             {layout.visualStages.map((stage) => (
-              <header
+              <motion.header
                 key={stage}
                 className="absolute top-0 text-center"
                 style={{
                   width: CARD_WIDTH,
-                  transform: `translateX(${layout.columnLeft(stage)}px)`,
                 }}
+                animate={{
+                  x: layout.columnLeft(stage),
+                  opacity: stage === activeStage ? 1 : (stageIndex.get(stage) ?? 0) < (stageIndex.get(activeStage) ?? 0) ? 0.62 : 0.85,
+                  scale: stage === activeStage ? 1.04 : 0.96,
+                }}
+                transition={{ type: 'spring', stiffness: 130, damping: 24 }}
                 dir={isRtl ? 'rtl' : 'ltr'}
               >
                 <h3 className="font-heading text-sm font-black uppercase tracking-[.08em] text-white">
                   {localizeStage(stage, t)}
                 </h3>
                 <p className="mt-1 text-[10px] text-white/38">{formatStageDates(stage, locale)}</p>
-              </header>
+              </motion.header>
             ))}
 
             <svg
@@ -419,8 +463,8 @@ export function KnockoutStage({ matches }) {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  animate={{ d: connector.path, opacity: 1 }}
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 0.45, ease: 'easeOut' }}
                 />
               ))}

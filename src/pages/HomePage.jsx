@@ -6,7 +6,7 @@ import { QuickActions } from '../components/home/QuickActions';
 import { TournamentJourney } from '../components/home/TournamentJourney';
 import { UpcomingMatches } from '../components/home/UpcomingMatches';
 import { useMatchData } from '../hooks/useMatchData';
-import { getNextMatches, isToday } from '../utils/time';
+import { getNextMatches, isTodayMatchday } from '../utils/time';
 import { sortByKickoff } from '../utils/matchHelpers';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -50,7 +50,7 @@ export default function HomePage() {
   if (error) return <main className="section-shell py-24 text-center text-red-300">{error}</main>;
   if (loading) return <HomeLoadingState multiple={nextMatches.length > 1} />;
 
-  const today = sorted.filter((match) => isToday(match.kickoffUTC));
+  const today = sorted.filter((match) => isTodayMatchday(match.kickoffUTC));
   const upcoming = sorted.filter((match) => match.status === 'live' || new Date(match.kickoffUTC) >= new Date());
 
   return (
