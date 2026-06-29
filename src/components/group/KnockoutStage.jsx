@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin, ShieldQuestion, Trophy } from 'lucide-react';
 import { FlagImage } from '../common/FlagImage';
-import { formatDisplayScore } from '../../utils/score';
 import { formatLocalDate, formatLocalTime } from '../../utils/time';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeCity, localizeStage, localizeStadium, localizeTeam } from '../../i18n/entities';
+import matchesDocument from '../../data/matches.json';
 
 const stageOrder = [
   'Round of 32',
@@ -47,6 +47,17 @@ const extractWinnerMatchNumber = (value = '') => {
 
 const isPlaceholderTeam = (name = '') => /^(Winner|Runner-up|Loser|3rd Place)/.test(String(name));
 
+const baseChildrenByMatch = new Map(
+  matchesDocument.matches
+    .filter((match) => stageOrder.includes(match.stage))
+    .map((match) => [
+      match.matchNumber,
+      [match.homeTeam, match.awayTeam].map(extractWinnerMatchNumber).filter(Boolean),
+    ]),
+);
+
+const uniqueNumbers = (values) => [...new Set(values.filter(Boolean))];
+
 const buildBracketLayout = (matches, isRtl) => {
   const bracketMatches = matches
     .filter((match) => stageOrder.includes(match.stage))
@@ -59,9 +70,12 @@ const buildBracketLayout = (matches, isRtl) => {
   const nextByMatch = new Map();
 
   bracketMatches.forEach((match) => {
-    const children = [match.homeTeam, match.awayTeam]
-      .map(extractWinnerMatchNumber)
-      .filter(Boolean)
+    const currentChildNumbers = [match.homeTeam, match.awayTeam].map(extractWinnerMatchNumber);
+    const childNumbers = uniqueNumbers([
+      ...currentChildNumbers,
+      ...(baseChildrenByMatch.get(match.matchNumber) ?? []),
+    ]);
+    const children = childNumbers
       .map((number) => byNumber.get(number))
       .filter(Boolean);
 
@@ -156,13 +170,30 @@ const buildBracketLayout = (matches, isRtl) => {
   };
 };
 
-function TeamSlot({ name, code, score, penalties }) {
+const getLogicalScores = (match) => ({
+  homeScore: match?.score?.home ?? match?.homeScore,
+  awayScore: match?.score?.away ?? match?.awayScore,
+});
+
+const getLoserSide = (match) => {
+  if (match.status !== 'finished') return null;
+  const { homeScore, awayScore } = getLogicalScores(match);
+
+  if (homeScore == null || awayScore == null) return null;
+
+  if (homeScore !== awayScore) return homeScore < awayScore ? 'home' : 'away';
+  if (match.homePenalties == null || match.awayPenalties == null) return null;
+  if (match.homePenalties === match.awayPenalties) return null;
+  return match.homePenalties < match.awayPenalties ? 'home' : 'away';
+};
+
+function TeamSlot({ name, code, score, penalties, muted = false }) {
   const { language } = useLanguage();
   const localizedName = localizeTeam(name, code, language);
   const placeholder = isPlaceholderTeam(name);
 
   return (
-    <div className="flex min-w-0 items-center gap-2.5">
+    <div className={`flex min-w-0 items-center gap-2.5 transition ${muted ? 'opacity-45 grayscale' : ''}`}>
       {placeholder ? (
         <span className="grid h-7 w-9 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[.05] text-white/35">
           <ShieldQuestion size={16} />
@@ -187,12 +218,12 @@ function KnockoutMatchCard({ item, index }) {
   const { language, locale } = useLanguage();
   const { match } = item;
   const isArabic = language === 'ar';
-  const displayScore = formatDisplayScore(match, isArabic);
-  const [homeScore, awayScore] = displayScore?.split('-') ?? [];
+  const { homeScore, awayScore } = getLogicalScores(match);
+  const loserSide = getLoserSide(match);
 
   return (
     <motion.article
-      className="bracket-match-card absolute rounded-2xl p-3.5"
+      className={`bracket-match-card absolute rounded-2xl p-3.5 ${match.status === 'finished' ? 'bracket-match-card-finished' : ''}`}
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -223,12 +254,14 @@ function KnockoutMatchCard({ item, index }) {
           code={match.homeCode}
           score={homeScore}
           penalties={match.homePenalties}
+          muted={loserSide === 'home'}
         />
         <TeamSlot
           name={match.awayTeam}
           code={match.awayCode}
           score={awayScore}
           penalties={match.awayPenalties}
+          muted={loserSide === 'away'}
         />
       </div>
 

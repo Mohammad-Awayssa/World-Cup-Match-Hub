@@ -198,6 +198,12 @@ button, a, select { min-height: 44px; }
   border-color: rgba(200,255,0,.38);
   box-shadow: 0 18px 48px rgba(0,0,0,.35), 0 0 28px rgba(200,255,0,.08);
 }
+.bracket-match-card-finished {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(148,163,184,.06), transparent 42%),
+    linear-gradient(145deg, rgba(13,24,38,.86), rgba(5,13,23,.92));
+  border-color: rgba(148,163,184,.16);
+}
 .bracket-match-card::before {
   content: "";
   position: absolute;
