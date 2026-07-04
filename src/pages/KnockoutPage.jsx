@@ -9,7 +9,7 @@ import { useLanguage } from '../hooks/useLanguage';
 const stats = [
   [Users, '32', 'knockout.teams', 'text-neon'],
   [Building2, '16', 'knockout.venues', 'text-purple-400'],
-  [Waypoints, '64', 'knockout.matches', 'text-red-400'],
+  [Waypoints, '32', 'knockout.matches', 'text-red-400'],
   [Trophy, '1', 'knockout.champion', 'text-blue-400'],
 ];
 

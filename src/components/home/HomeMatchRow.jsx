@@ -1,11 +1,11 @@
-import { CalendarDays, ChevronRight, MapPin } from 'lucide-react';
+import { CalendarDays, MapPin } from 'lucide-react';
 import { FlagImage } from '../common/FlagImage';
 import { formatLocalDate, formatLocalTime } from '../../utils/time';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeStage, localizeStadium, localizeTeam } from '../../i18n/entities';
 import { formatDisplayScore } from '../../utils/score';
 
-export function HomeMatchRow({ match, compact = false, anchorId }) {
+export function HomeMatchRow({ match, anchorId }) {
   const { language, locale, isArabic, t } = useLanguage();
   const displayScore = formatDisplayScore(match, isArabic);
   const isLive = match.status === 'live';
@@ -36,8 +36,6 @@ export function HomeMatchRow({ match, compact = false, anchorId }) {
         <span className="flex items-center gap-1.5"><CalendarDays size={12} />{formatLocalDate(match.kickoffUTC, {}, locale)}</span>
         <span className="flex min-w-0 items-center gap-1.5"><MapPin size={12} className="shrink-0" /><span className="truncate">{localizeStadium(match.stadium, language)}</span></span>
       </div>
-
-      {compact && <ChevronRight className="rtl-flip absolute end-3 top-1/2 hidden -translate-y-1/2 text-white/30 lg:block" size={18} />}
     </article>
   );
 }

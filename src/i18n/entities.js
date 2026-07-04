@@ -96,6 +96,9 @@ const arabicStadiums = {
 const normalizeCode = (code = '') => String(code ?? '').toLowerCase().replace('-', '_');
 
 export const localizeTeam = (name, code, language) => {
+  if (/^(Winner|Loser) Match \d+$/.test(String(name ?? ''))) {
+    return language === 'ar' ? '\u064a\u062d\u062f\u062f \u0644\u0627\u062d\u0642\u0627' : 'To be decided';
+  }
   if (language !== 'ar') return name;
   const translated = arabicTeamsByCode[normalizeCode(code)] ?? arabicTeamsByName[name];
   if (translated) return translated;
