@@ -233,10 +233,17 @@ export const inferMatchStatus = (match, now = Date.now(), inferScheduledStatus =
     return match.status;
   }
 
-  if (match.status === 'live') return 'live';
+  const kickoff = new Date(match.kickoffUTC).getTime();
+
+  // Only trust the provider's 'live' status if the kickoff time has actually passed.
+  // Some providers report 'live' for pre-match coverage hours before kickoff.
+  if (match.status === 'live') {
+    if (Number.isFinite(kickoff) && now < kickoff) return 'upcoming';
+    return 'live';
+  }
+
   if (!inferScheduledStatus) return match.status ?? 'upcoming';
 
-  const kickoff = new Date(match.kickoffUTC).getTime();
   const assumedMatchEnd = kickoff + (3 * 60 * 60 * 1000);
 
   if (now >= kickoff && now < assumedMatchEnd) return 'live';
