@@ -3,11 +3,15 @@ import { FlagImage } from '../common/FlagImage';
 import { formatLocalDate, formatLocalTime } from '../../utils/time';
 import { useLanguage } from '../../hooks/useLanguage';
 import { localizeStage, localizeStadium, localizeTeam } from '../../i18n/entities';
-import { formatDisplayScore } from '../../utils/score';
+import { formatDisplayScore, getMatchScores } from '../../utils/score';
 
 export function HomeMatchRow({ match, anchorId }) {
   const { language, locale, isArabic, t } = useLanguage();
   const displayScore = formatDisplayScore(match, isArabic);
+  const { homePenalties, awayPenalties } = getMatchScores(match);
+  const displayPenalties = homePenalties != null && awayPenalties != null
+    ? (isArabic ? `${awayPenalties}-${homePenalties}` : `${homePenalties}-${awayPenalties}`)
+    : null;
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
 
@@ -22,8 +26,13 @@ export function HomeMatchRow({ match, anchorId }) {
           <span className="font-heading truncate text-end text-xs font-bold uppercase sm:text-base">{localizeTeam(match.homeTeam, match.homeCode, language)}</span>
           <FlagImage code={match.homeCode} team={localizeTeam(match.homeTeam, match.homeCode, language)} small />
         </div>
-        <span dir="ltr" className={`font-heading px-1 text-sm font-black sm:px-2 sm:text-base ${isLive ? 'text-red-400' : isFinished ? 'text-slate-200' : 'text-neon'}`}>
-          {displayScore ?? 'VS'}
+        <span dir="ltr" className={`font-heading flex min-w-[3.25rem] flex-col items-center px-1 text-sm font-black leading-none sm:min-w-[3.75rem] sm:px-2 sm:text-base ${isLive ? 'text-red-400' : isFinished ? 'text-slate-200' : 'text-neon'}`}>
+          <span>{displayScore ?? 'VS'}</span>
+          {displayPenalties && (
+            <small className={`mt-1 rounded-full border px-1.5 py-0.5 text-[9px] font-black leading-none sm:text-[10px] ${isFinished ? 'border-neon/25 bg-neon/8 text-neon' : 'border-white/10 bg-white/5 text-white/55'}`}>
+              {displayPenalties}
+            </small>
+          )}
         </span>
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <FlagImage code={match.awayCode} team={localizeTeam(match.awayTeam, match.awayCode, language)} small />

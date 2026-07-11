@@ -11,13 +11,24 @@ const getBaseMatches = () => mergeLiveMatches(matches, [], Date.now(), {
 });
 
 const getMatchesWithLiveData = async () => {
-  const response = await fetch('/api/live-scores');
-  if (!response.ok) throw new Error(`Live scores returned ${response.status}`);
-  const data = await response.json();
-  if (!Array.isArray(data.matches) || !data.matches.length) {
-    throw new Error('Live scores returned no matches');
-  }
-  return mergeLiveMatches(matches, data.matches);
+  const fetchLiveScores = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Live scores returned ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data.matches) || !data.matches.length) {
+      throw new Error('Live scores returned no matches');
+    }
+    return data.matches;
+  };
+
+  const matchesFromLocalApi = await fetchLiveScores('/api/live-scores').catch(async () => {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return fetchLiveScores('https://worldcupmatches.online/api/live-scores');
+    }
+    throw new Error('Live scores returned invalid data');
+  });
+
+  return mergeLiveMatches(matches, matchesFromLocalApi);
 };
 
 export const localAdapter = {

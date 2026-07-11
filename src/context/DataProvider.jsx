@@ -5,11 +5,12 @@ import { calculateGroupStandings } from '../utils/standings';
 import matchesDocument from '../data/matches.json';
 import baseGroups from '../data/groups.json';
 import stadiums from '../data/stadiums.json';
-import { mergeLiveMatches } from '../utils/liveMatches';
+import { mergeLiveMatches, resolveKnockoutParticipants } from '../utils/liveMatches';
 
 export const DataContext = createContext(null);
 
-const LIVE_CACHE_KEY = 'wc2026-live-matches-cache-v2';
+const LIVE_CACHE_KEY = 'wc2026-live-matches-cache-v3';
+const LEGACY_LIVE_CACHE_KEYS = ['wc2026-live-matches-cache-v2'];
 const LIVE_CACHE_TTL_MS = 2 * 60 * 1000;
 
 const scheduleMetadata = {
@@ -17,26 +18,37 @@ const scheduleMetadata = {
   source: matchesDocument.source,
 };
 
-const buildState = (matches, loading = false) => ({
-  matches,
-  groups: calculateGroupStandings(baseGroups, matches),
-  stadiums,
-  scheduleMetadata,
-  loading,
-  error: null,
-});
+const prepareMatches = (matches, now = Date.now(), inferScheduledStatus = true) => (
+  resolveKnockoutParticipants(
+    mergeLiveMatches(matchesDocument.matches, matches, now, { inferScheduledStatus }),
+    matchesDocument.matches,
+  )
+);
 
-const getBaseMatches = () => mergeLiveMatches(matchesDocument.matches, [], Date.now(), {
-  inferScheduledStatus: false,
-});
+const buildState = (matches, loading = false) => {
+  const preparedMatches = prepareMatches(matches);
+
+  return {
+    matches: preparedMatches,
+    groups: calculateGroupStandings(baseGroups, preparedMatches),
+    stadiums,
+    scheduleMetadata,
+    loading,
+    error: null,
+  };
+};
+
+const getBaseMatches = () => prepareMatches([], Date.now(), false);
 
 const readCachedMatches = () => {
   try {
-    const cached = JSON.parse(localStorage.getItem(LIVE_CACHE_KEY));
-    if (!cached?.matches || Date.now() - cached.savedAt > LIVE_CACHE_TTL_MS) {
-      return null;
+    for (const key of [LIVE_CACHE_KEY, ...LEGACY_LIVE_CACHE_KEYS]) {
+      const cached = JSON.parse(localStorage.getItem(key));
+      if (cached?.matches && Date.now() - cached.savedAt <= LIVE_CACHE_TTL_MS) {
+        return prepareMatches(cached.matches);
+      }
     }
-    return cached.matches;
+    return null;
   } catch {
     return null;
   }
@@ -66,8 +78,9 @@ export function DataProvider({ children }) {
     const refreshLiveScores = async () => {
       try {
         const matches = await matchService.getLiveMatches();
-        writeCachedMatches(matches);
-        if (active) setState(buildState(matches));
+        const preparedMatches = prepareMatches(matches);
+        writeCachedMatches(preparedMatches);
+        if (active) setState(buildState(preparedMatches));
       } catch {
         if (active) setState((current) => ({ ...current, loading: false, error: null }));
       }

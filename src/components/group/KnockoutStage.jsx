@@ -45,7 +45,14 @@ const extractWinnerMatchNumber = (value = '') => {
   return match ? Number(match[1]) : null;
 };
 
+const extractLoserMatchNumber = (value = '') => {
+  const match = String(value).match(/^Loser Match (\d+)$/);
+  return match ? Number(match[1]) : null;
+};
+
 const isPlaceholderTeam = (name = '') => /^(Winner|Runner-up|Loser|3rd Place)/.test(String(name));
+
+const isUndecidedTeam = (name = '') => /^(to be decided|tbd|to be confirmed)$/i.test(String(name).trim());
 
 const baseChildrenByMatch = new Map(
   matchesDocument.matches
@@ -175,7 +182,21 @@ const getLogicalScores = (match) => ({
   awayScore: match?.score?.away ?? match?.awayScore,
 });
 
+const getWinnerSide = (match) => {
+  if (!match) return null;
+  if (match.status !== 'finished') return null;
+  const { homeScore, awayScore } = getLogicalScores(match);
+
+  if (homeScore == null || awayScore == null) return null;
+
+  if (homeScore !== awayScore) return homeScore > awayScore ? 'home' : 'away';
+  if (match.homePenalties == null || match.awayPenalties == null) return null;
+  if (match.homePenalties === match.awayPenalties) return null;
+  return match.homePenalties > match.awayPenalties ? 'home' : 'away';
+};
+
 const getLoserSide = (match) => {
+  if (!match) return null;
   if (match.status !== 'finished') return null;
   const { homeScore, awayScore } = getLogicalScores(match);
 
@@ -185,6 +206,72 @@ const getLoserSide = (match) => {
   if (match.homePenalties == null || match.awayPenalties == null) return null;
   if (match.homePenalties === match.awayPenalties) return null;
   return match.homePenalties < match.awayPenalties ? 'home' : 'away';
+};
+
+const teamFromSide = (match, side) => {
+  if (!side) return null;
+  return {
+    team: match[`${side}Team`],
+    code: match[`${side}Code`],
+  };
+};
+
+const resolveBracketParticipants = (matches) => {
+  const byNumber = new Map(matches.map((match) => [match.matchNumber, match]));
+  const baseByNumber = new Map(matchesDocument.matches.map((match) => [match.matchNumber, match]));
+  const resolved = new Map();
+
+  const resolveMatch = (match, visiting = new Set()) => {
+    if (!match) return null;
+    if (resolved.has(match.matchNumber)) return resolved.get(match.matchNumber);
+    if (visiting.has(match.matchNumber)) return match;
+
+    visiting.add(match.matchNumber);
+
+    const resolveSlot = (slotName, slotCode) => {
+      const rawName = match[slotName];
+      const baseName = baseByNumber.get(match.matchNumber)?.[slotName];
+      const routeName = isUndecidedTeam(rawName) && baseName ? baseName : rawName;
+      const winnerMatchNumber = extractWinnerMatchNumber(routeName);
+      const loserMatchNumber = extractLoserMatchNumber(routeName);
+      const sourceNumber = winnerMatchNumber ?? loserMatchNumber;
+      if (!sourceNumber) {
+        return {
+          team: rawName,
+          code: match[slotCode],
+        };
+      }
+
+      const sourceMatch = resolveMatch(byNumber.get(sourceNumber), visiting);
+      const side = winnerMatchNumber
+        ? getWinnerSide(sourceMatch)
+        : getLoserSide(sourceMatch);
+      const sourceTeam = teamFromSide(sourceMatch, side);
+
+      return sourceTeam?.team
+        ? sourceTeam
+        : {
+          team: rawName,
+          code: match[slotCode],
+        };
+    };
+
+    const home = resolveSlot('homeTeam', 'homeCode');
+    const away = resolveSlot('awayTeam', 'awayCode');
+    const next = {
+      ...match,
+      homeTeam: home.team,
+      homeCode: home.code,
+      awayTeam: away.team,
+      awayCode: away.code,
+    };
+
+    visiting.delete(match.matchNumber);
+    resolved.set(match.matchNumber, next);
+    return next;
+  };
+
+  return matches.map((match) => resolveMatch(match));
 };
 
 function TeamSlot({ name, code, score, penalties, muted = false }) {
@@ -282,10 +369,16 @@ export function KnockoutStage({ matches }) {
   const scrollerRef = useRef(null);
   const [activeStage, setActiveStage] = useState('Round of 32');
   const bracketMatches = useMemo(
-    () => matches.filter((match) => match.stage !== 'Group Stage' && match.stage !== 'Third Place'),
+    () => resolveBracketParticipants(
+      matches.filter((match) => match.stage !== 'Group Stage' && match.stage !== 'Third Place'),
+    ),
     [matches],
   );
-  const thirdPlace = matches.find((match) => match.stage === 'Third Place');
+  const thirdPlace = useMemo(
+    () => resolveBracketParticipants(matches.filter((match) => match.stage !== 'Group Stage'))
+      .find((match) => match.stage === 'Third Place'),
+    [matches],
+  );
   const layout = useMemo(() => buildBracketLayout(bracketMatches, isRtl), [bracketMatches, isRtl]);
 
   const focusStage = (stage) => {
