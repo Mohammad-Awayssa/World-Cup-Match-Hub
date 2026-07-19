@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { getMatchScores } from '../../utils/score';
 import { getFlagUrl } from '../../utils/flagUrl';
@@ -228,7 +228,17 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
   const [visible, setVisible] = useState(false);
   const hasRun = useRef(false);
 
-  const winner = getWinner(finalMatch);
+  // Memoize winner so it stays stable across live-data polls
+  // (structuredClone creates new object refs every poll cycle)
+  const winner = useMemo(() => getWinner(finalMatch), [
+    finalMatch?.status,
+    finalMatch?.homeScore, finalMatch?.awayScore,
+    finalMatch?.homePenalties, finalMatch?.awayPenalties,
+    finalMatch?.homeTeam, finalMatch?.awayTeam,
+    finalMatch?.homeCode, finalMatch?.awayCode,
+  ]);
+
+  const hasWinner = !!winner;
 
   const dismiss = useCallback(() => {
     if (fadingOut) return;
@@ -241,7 +251,7 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
   }, [fadingOut, onComplete]);
 
   useEffect(() => {
-    if (!winner) return;
+    if (!hasWinner) return;
     if (hasRun.current) return;
 
     // Check localStorage — skip if already shown
@@ -265,7 +275,7 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
       clearTimeout(modalTimer);
       clearTimeout(autoTimer);
     };
-  }, [winner, dismiss, onComplete]);
+  }, [hasWinner, dismiss, onComplete]);
 
   // Start canvas animations when visible
   useEffect(() => {
