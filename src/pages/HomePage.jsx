@@ -1,3 +1,4 @@
+import { useState, useCallback, useMemo } from 'react';
 import { ArrowRight, CalendarOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Hero } from '../components/hero/Hero';
@@ -5,10 +6,13 @@ import { HomeMatchRow } from '../components/home/HomeMatchRow';
 import { QuickActions } from '../components/home/QuickActions';
 import { TournamentJourney } from '../components/home/TournamentJourney';
 import { UpcomingMatches } from '../components/home/UpcomingMatches';
+import { WinnerCelebration, STORAGE_KEY } from '../components/celebration/WinnerCelebration';
+import { ThankYouScreen } from '../components/celebration/ThankYouScreen';
 import { useMatchData } from '../hooks/useMatchData';
 import { getNextMatches, isToday } from '../utils/time';
 import { sortByKickoff } from '../utils/matchHelpers';
 import { useLanguage } from '../hooks/useLanguage';
+import { getMatchScores } from '../utils/score';
 
 function SectionHeader({ title, to = '/schedule', linkLabel }) {
   return (
@@ -41,11 +45,66 @@ function HomeLoadingState({ multiple = false }) {
   );
 }
 
+/* ── Determine if final match has a winner ── */
+function hasFinalWinner(match) {
+  if (!match || match.status !== 'finished') return false;
+  const { homeScore, awayScore, homePenalties, awayPenalties } = getMatchScores(match);
+  if (homeScore == null || awayScore == null) return false;
+  if (homeScore !== awayScore) return true;
+  if (homePenalties != null && awayPenalties != null && homePenalties !== awayPenalties) return true;
+  return false;
+}
+
+/* ── Check if celebration was already shown ── */
+function wasCelebrationShown() {
+  return false;
+}
+
 export default function HomePage() {
   const { t } = useLanguage();
   const { matches, loading, error } = useMatchData();
   const sorted = sortByKickoff(matches);
   const nextMatches = getNextMatches(sorted);
+
+  // Find the Final match
+  const finalMatch = useMemo(
+    () => sorted.find((m) => m.stage === 'Final') ?? null,
+    [sorted],
+  );
+
+  const isFinalFinished = finalMatch && hasFinalWinner(finalMatch);
+  const alreadyShown = useMemo(() => wasCelebrationShown(), []);
+
+  // Celebration flow state machine: 'idle' → 'celebrating' → 'thankyou' → 'done'
+  const [phase, setPhase] = useState(() => {
+    if (isFinalFinished && alreadyShown) return 'done';
+    if (isFinalFinished && !alreadyShown) return 'celebrating';
+    return 'idle';
+  });
+
+  // When the final becomes finished during the session (via live polling)
+  // and we haven't started celebrating yet
+  useMemo(() => {
+    if (isFinalFinished && phase === 'idle' && !alreadyShown) {
+      setPhase('celebrating');
+    }
+  }, [isFinalFinished, phase, alreadyShown]);
+
+  const handleCelebrationComplete = useCallback(() => {
+    setPhase('thankyou');
+  }, []);
+
+  const handleThankYouComplete = useCallback(() => {
+    setPhase('done');
+  }, []);
+
+  const handleViewMatch = useCallback(() => {
+    // Scroll to top — the hero already shows the match
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Should we show the 2030 countdown?
+  const show2030 = isFinalFinished && phase === 'done';
 
   if (error) return <main className="section-shell py-24 text-center text-red-300">{error}</main>;
   if (loading) return <HomeLoadingState multiple={nextMatches.length > 1} />;
@@ -55,7 +114,7 @@ export default function HomePage() {
 
   return (
     <main className="home-broadcast pb-20">
-      <Hero matches={nextMatches} />
+      <Hero matches={show2030 ? nextMatches : nextMatches} show2030={show2030} />
       <QuickActions />
 
       <div className="section-shell mt-12 space-y-8">
@@ -75,6 +134,20 @@ export default function HomePage() {
         <TournamentJourney />
         <UpcomingMatches matches={upcoming} />
       </div>
+
+      {/* Celebration sequence */}
+      {phase === 'celebrating' && (
+        <WinnerCelebration
+          finalMatch={finalMatch}
+          onComplete={handleCelebrationComplete}
+          onViewMatch={handleViewMatch}
+        />
+      )}
+
+      {/* Thank-you screen */}
+      {phase === 'thankyou' && (
+        <ThankYouScreen onComplete={handleThankYouComplete} />
+      )}
     </main>
   );
 }

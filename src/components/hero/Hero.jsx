@@ -9,6 +9,18 @@ import { useLanguage } from '../../hooks/useLanguage';
 import { localizeCity, localizeStadium, localizeTeam } from '../../i18n/entities';
 import { formatDisplayScore } from '../../utils/score';
 
+/* ── 2030 World Cup info ── */
+const WC_2030_KICKOFF = '2030-06-13T00:00:00.000Z';
+const WC_2030_HOSTS = 'Morocco, Spain & Portugal';
+
+function FinalBadge() {
+  return (
+    <div className="final-badge mb-3">
+      <span className="final-badge-text">🏆 FINAL</span>
+    </div>
+  );
+}
+
 function HeroFixture({ match, multiple, language, locale, isArabic }) {
   const displayScore = formatDisplayScore(match, isArabic);
   const homeName = localizeTeam(match.homeTeam, match.homeCode, language);
@@ -59,12 +71,71 @@ function HeroFixture({ match, multiple, language, locale, isArabic }) {
   );
 }
 
-export function Hero({ matches = [] }) {
+/* ── 2030 Countdown Card ── */
+function Hero2030() {
+  return (
+    <div className="hero-fade-enter flex flex-col items-center text-center">
+      <div className="final-badge mb-4">
+        <span className="final-badge-text">🌍 NEXT WORLD CUP</span>
+      </div>
+
+      <div className="mb-6 flex items-center justify-center gap-4">
+        <span className="h-px w-8 bg-neon sm:w-12" />
+        <p className="font-heading text-center text-xs font-black uppercase tracking-[.18em] text-neon">
+          Next World Cup
+        </p>
+        <span className="h-px w-8 bg-neon sm:w-12" />
+      </div>
+
+      <CountdownTimer target={WC_2030_KICKOFF} status="upcoming" />
+
+      <h2 className="font-heading mt-8 text-2xl font-black uppercase sm:text-3xl">
+        FIFA World Cup 2030
+      </h2>
+
+      <p className="mt-3 text-sm text-white/55">
+        {WC_2030_HOSTS}
+      </p>
+
+      <p className="mt-6 text-center text-[10px] font-bold uppercase tracking-[.2em] text-white/35">
+        worldcupmatches.online
+      </p>
+    </div>
+  );
+}
+
+export function Hero({ matches = [], show2030 = false }) {
   const { language, locale, isArabic, t } = useLanguage();
+
+  // 2030 mode
+  if (show2030) {
+    return (
+      <section className="relative overflow-hidden border-b border-white/[.06]">
+        <picture className="absolute inset-0">
+          <source media="(max-width: 639px)" srcSet={backgroundMobile} />
+          <img src={backgroundDesktop} alt="" className="h-full w-full object-cover object-top" />
+        </picture>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020814]/20 via-[#020814]/25 to-[#020814]" />
+
+        <div className="section-shell relative z-10 flex min-h-[650px] flex-col items-center justify-center py-10 sm:min-h-[700px] sm:py-14">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: .55 }}
+            className="match-hero-card relative w-full overflow-hidden rounded-[1.75rem] px-4 pb-5 pt-7 sm:px-8 sm:pb-7 max-w-3xl sm:px-10"
+          >
+            <Hero2030 />
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
   if (!matches.length) return null;
 
   const multiple = matches.length > 1;
   const isLive = matches.some((match) => match.status === 'live');
+  const isFinal = matches.some((match) => match.stage === 'Final');
   const title = isLive
     ? t(multiple ? 'home.matchesInProgress' : 'home.matchInProgress')
     : t(multiple ? 'home.nextMatches' : 'home.nextMatch');
@@ -84,6 +155,13 @@ export function Hero({ matches = [] }) {
           transition={{ duration: .55 }}
           className={`match-hero-card relative w-full overflow-hidden rounded-[1.75rem] px-4 pb-5 pt-7 sm:px-8 sm:pb-7 ${multiple ? 'max-w-6xl' : 'max-w-3xl sm:px-10'}`}
         >
+          {/* Final badge */}
+          {isFinal && (
+            <div className="mb-2 flex justify-center">
+              <FinalBadge />
+            </div>
+          )}
+
           <div className="mb-6 flex items-center justify-center gap-4">
             <span className="h-px w-8 bg-neon sm:w-12" />
             <p className={`font-heading text-center text-xs font-black uppercase tracking-[.18em] ${isLive ? 'text-red-400' : 'text-neon'}`}>

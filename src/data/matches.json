@@ -2168,10 +2168,10 @@
     {
       "id": 104,
       "matchNumber": 104,
-      "homeTeam": "Winner Match 101",
-      "awayTeam": "Winner Match 102",
-      "homeCode": null,
-      "awayCode": null,
+      "homeTeam": "Spain",
+      "awayTeam": "Argentina",
+      "homeCode": "es",
+      "awayCode": "ar",
       "kickoffUTC": "2026-07-19T19:00:00.000Z",
       "stadium": "New York New Jersey Stadium",
       "city": "New York/New Jersey",
@@ -2179,12 +2179,12 @@
       "group": null,
       "stage": "Final",
       "round": null,
-      "status": "upcoming",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
       "homePenalties": null,
       "awayPenalties": null,
-      "winner": null
+      "winner": "Spain"
     }
   ]
 }

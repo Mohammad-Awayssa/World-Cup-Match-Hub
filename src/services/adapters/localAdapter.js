@@ -33,7 +33,7 @@ const getMatchesWithLiveData = async () => {
 
 export const localAdapter = {
   getAllMatches: async () => clone(getBaseMatches()),
-  getLiveMatches: async () => clone(await getMatchesWithLiveData()),
+  getLiveMatches: async () => clone(getBaseMatches()),
   getScheduleMetadata: async () => clone({
     lastUpdated: matchesDocument.lastUpdated,
     source: matchesDocument.source,

@@ -128,6 +128,13 @@ export const translations = {
       dataCopy: 'The public match service combines a verified local schedule with live score providers while preserving the same contract for matches, groups, teams, and venues.',
       dataNote: 'Schedule data is stored locally and can be updated manually.',
     },
+    celebration: {
+      worldChampions: '🏆 World Champions 2026',
+      congratulations: 'Congratulations on becoming FIFA World Cup 2026 Champions!',
+      viewMatch: 'View Match',
+      continue: 'Continue',
+      thankYou: 'Thank you for following the FIFA World Cup 2026 with us. ❤️\nSee you in 2030.'
+    },
   },
   ar: {
     language: { switchTo: 'EN', english: 'الإنجليزية', arabic: 'العربية' },
@@ -257,6 +264,13 @@ export const translations = {
       localLive: 'جدول محلي ونتائج مباشرة.',
       dataCopy: 'تجمع خدمة المباريات بين جدول محلي موثوق ومصادر النتائج المباشرة مع الحفاظ على عقد بيانات موحد للمباريات والمجموعات والمنتخبات والملاعب.',
       dataNote: 'يتم تخزين بيانات الجدول محلياً ويمكن تحديثها يدوياً.',
+    },
+    celebration: {
+      worldChampions: '🏆 أبطال العالم 2026',
+      congratulations: 'تهانينا على التتويج بلقب كأس العالم 2026!',
+      viewMatch: 'عرض المباراة',
+      continue: 'متابعة',
+      thankYou: 'نشكركم على متابعة كأس العالم 2026 معنا. ❤️\nنراكم في 2030.'
     },
   },
 };
