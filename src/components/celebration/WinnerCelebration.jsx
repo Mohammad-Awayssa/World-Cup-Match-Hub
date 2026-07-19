@@ -244,13 +244,13 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
     if (!winner) return;
     if (hasRun.current) return;
 
-    // Check localStorage
-    // try {
-    //   if (localStorage.getItem(STORAGE_KEY) === 'true') {
-    //     onComplete?.();
-    //     return;
-    //   }
-    // } catch {}
+    // Check localStorage — skip if already shown
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === 'true') {
+        onComplete?.();
+        return;
+      }
+    } catch {}
 
     hasRun.current = true;
     setVisible(true);

@@ -2179,12 +2179,12 @@
       "group": null,
       "stage": "Final",
       "round": null,
-      "status": "finished",
-      "homeScore": 2,
-      "awayScore": 1,
+      "status": "upcoming",
+      "homeScore": null,
+      "awayScore": null,
       "homePenalties": null,
       "awayPenalties": null,
-      "winner": "Spain"
+      "winner": null
     }
   ]
 }
