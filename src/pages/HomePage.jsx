@@ -57,11 +57,7 @@ function hasFinalWinner(match) {
 
 /* ── Check if celebration was already shown ── */
 function wasCelebrationShown() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === 'true';
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 export default function HomePage() {

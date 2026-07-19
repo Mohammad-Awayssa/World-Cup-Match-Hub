@@ -245,7 +245,6 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
     setFadingOut(true);
     setTimeout(() => {
       setVisible(false);
-      try { localStorage.setItem(STORAGE_KEY, 'true'); } catch {}
       onComplete?.();
     }, FADE_OUT_MS);
   }, [fadingOut, onComplete]);
@@ -254,13 +253,7 @@ export function WinnerCelebration({ finalMatch, onComplete, onViewMatch }) {
     if (!hasWinner) return;
     if (hasRun.current) return;
 
-    // Check localStorage — skip if already shown
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === 'true') {
-        onComplete?.();
-        return;
-      }
-    } catch {}
+
 
     hasRun.current = true;
     setVisible(true);
